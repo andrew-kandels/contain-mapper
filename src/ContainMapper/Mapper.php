@@ -20,6 +20,7 @@
 namespace ContainMapper;
 
 use Contain\Entity\EntityInterface;
+use ContainMapper\Driver;
 
 /**
  * Mapper which links a data source to Contain entities.
@@ -50,19 +51,19 @@ class Mapper extends Service\AbstractService
      * @param   Full classname of the entity this mapper is responsible for hydrating
      * @return  $this
      */
-    public function __construct(Driver\DriverInterface $driver, $entity)
+    public function __construct(Driver\AbstractDriver $driver, $entity)
     {
         $this->driver = $driver;
-        $this->entity = $entiy;
+        $this->entity = $entity;
     }
 
     /**
      * Sets the data source driver.
      *
-     * @param   ContainMapper\Driver\DriverInterface
+     * @param   ContainMapper\Driver\AbstractDriver
      * @return  $this
      */
-    public function setDriver(ContainMapper\Driver\DriverInterface $driver)
+    public function setDriver(Driver\AbstractDriver $driver)
     {
         $this->driver = $driver;
         return $this;
@@ -71,7 +72,7 @@ class Mapper extends Service\AbstractService
     /**
      * Gets the data source driver.
      *
-     * @return  ContainMapper\Driver\DriverInterface
+     * @return  ContainMapper\Driver\AbstractDriver
      */
     public function getDriver()
     {
@@ -94,7 +95,6 @@ class Mapper extends Service\AbstractService
         $entity->persisted()->clean();
 
         $this->getEventManager()->trigger('hydrate.post', $entity);
-        $this->clean();
 
         return $entity;
     }
@@ -146,7 +146,7 @@ class Mapper extends Service\AbstractService
         $this->getEventManager()->trigger('delete.pre', $entity);
 
         $this->prepare($this->driver)->delete($entity);
-        $entity->persisted()->clean();
+        $entity->clean();
 
         $this->getEventManager()->trigger('delete.post', $entity);
 
@@ -212,7 +212,6 @@ class Mapper extends Service\AbstractService
         $resolver = $this->resolve($entity, $query)
                          ->assertType('Contain\Entity\Property\Type\IntegerType');
 
-
         $property = $resolver->getEntity()->property($resolver->getProperty());
         $this->getEventManager()->trigger('update.pre', $resolver->getEntity());
         $property->setValue($property->getValue() + $inc);
@@ -248,10 +247,18 @@ class Mapper extends Service\AbstractService
         if (count($value = $resolver->getType()->export($value)) != 1) {
             throw new InvalidArgumentException('Multiple values passed to ' . __METHOD__ . ' not allowed.');
         }
+        list($value) = $value; // remove outer array
 
         $this->prepare($this->driver)->push($entity, $query, $value, $ifNotExists);
-        $this->getEventManager()->trigger('update.post', $resolver->getEntity());
+
+        $property = $resolver->getEntity()->property($resolver->getProperty());
+        $this->getEventManager()->trigger('update.pre', $resolver->getEntity());
+        $arr = $property->getValue();
+        $arr[] = $value;
+        $property->setValue($arr);
+
         $resolver->getEntity()->clean($resolver->getProperty());
+        $this->getEventManager()->trigger('update.post', $resolver->getEntity());
 
         return $this;
     }
@@ -278,8 +285,21 @@ class Mapper extends Service\AbstractService
         if (count($value = $resolver->getType()->export($value)) != 1) {
             throw new InvalidArgumentException('Multiple values passed to ' . __METHOD__ . ' not allowed.');
         }
+        list($value) = $value; // remove outer array
 
         $this->prepare($this->driver)->pull($entity, $query, $value);
+
+        $property = $resolver->getEntity()->property($resolver->getProperty());
+        $this->getEventManager()->trigger('update.pre', $resolver->getEntity());
+        $arr = $property->getValue();
+        foreach ($arr as $index => $val) {
+            if ($val === $value) {
+                unset($arr[$index]);
+                break;
+            }
+        }
+        $property->setValue(array_merge(array(), $arr));
+
         $this->getEventManager()->trigger('update.post', $resolver->getEntity());
         $resolver->getEntity()->clean($resolver->getProperty());
 

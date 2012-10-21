@@ -49,17 +49,15 @@ class Driver extends ContainMapper\Driver\AbstractDriver
             }
 
             $primary = uniqid('', true);
+            $entity->setExtendedProperty('_id', $primary);
         }
-
-        $data = $entity->export();
-        $data['_id'] = $primary;
 
         $options = $this->getOptions(array(
             'expiration' => 86400,
         ));
         $expiration = $options['expiration'];
 
-        $this->getCollection()->set($primary, $entity->export(), $expiration);
+        $this->getConnection()->getConnection()->set($primary, $entity->export(), $expiration);
 
         return $this;
     }
@@ -82,7 +80,7 @@ class Driver extends ContainMapper\Driver\AbstractDriver
         ));
         $seconds = $options['time'];
 
-        $this->getCollection()->delete($id, $seconds);
+        $this->getConnection()->getConnection()->delete($id, $seconds);
 
         return $this;
     }
@@ -95,7 +93,7 @@ class Driver extends ContainMapper\Driver\AbstractDriver
      */
     public function findOne($criteria = null)
     {
-        return $this->getCollection()->get(
+        return $this->getConnection()->getConnection()->get(
             $criteria
         );
     }
@@ -108,16 +106,18 @@ class Driver extends ContainMapper\Driver\AbstractDriver
      */
     public function find($criteria = null)
     {
-        $results = $this->getCollection()->getMulti($criteria, $tokens);
+        $results = $this->getConnection()
+            ->getConnection()
+            ->getMulti($criteria, $tokens);
 
         if ($this->skip !== null) {
             $results = array_slice($results, $this->skip);
         }
 
         if ($this->limit > 0) {
-            return array_slice($results, 0, $this->limit);
+            $results = array_slice($results, 0, $this->limit);
         }
 
-        return $result;
+        return $results;
     }
 }

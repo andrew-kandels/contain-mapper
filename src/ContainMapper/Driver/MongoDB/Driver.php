@@ -35,21 +35,22 @@ use ContainMapper\Resolver;
  * @copyright   Copyright (c) 2012 Andrew P. Kandels (http://andrewkandels.com)
  * @license     http://www.opensource.org/licenses/bsd-license.php BSD License
  */
-class MongoDB extends AbstractDriver
+class Driver extends AbstractDriver
 {
     /**
      * Rewrites the dirty() output from an entity into something
      * MongoDb can use in an update statement.
      *
      * @param   EntityInterface     Reference entity
-     * @param   array               Dirty output
      * @return  array
      */
     public function getUpdateCriteria(EntityInterface $entity)
     {
-        $result = array();
-
-        $dirty = $entity->export($entity->dirty(), true);
+        $dirty = $result = array();
+        
+        if ($properties = $entity->dirty()) {
+            $dirty = $entity->export($properties);
+        }
 
         foreach ($dirty as $property => $value) {
             $type = $entity->type($property);
@@ -92,8 +93,8 @@ class MongoDB extends AbstractDriver
         $data = $entity->export();
         $data['_id'] = $primary;
 
-        if ($entity->isPersisted()) {
-            $this->getCollection()->insert(
+        if (!$entity->isPersisted()) {
+            $this->getConnection()->getCollection()->insert(
                 $data,
                 $this->getOptions(array(
                     'safe'    => false,
@@ -102,7 +103,7 @@ class MongoDB extends AbstractDriver
                 ))
             );
         } else {
-            $this->getCollection()->update(
+            $this->getConnection()->getCollection()->update(
                 array('_id' => $primary),
                 array('$set' => $this->getUpdateCriteria($entity)),
                 $this->getOptions(array(
@@ -129,7 +130,7 @@ class MongoDB extends AbstractDriver
      */
     public function count($criteria)
     {
-        return $this->getCollection()->count($criteria);
+        return $this->getConnection()->getCollection()->count($criteria);
     }
 
     /**
@@ -152,7 +153,7 @@ class MongoDB extends AbstractDriver
             'timeout' => 60000, // 1 minute
         ));
 
-        $this->getCollection()->remove(
+        $this->getConnection()->getCollection()->remove(
             $criteria = array('_id' => $id),
             $options
         );
@@ -168,7 +169,7 @@ class MongoDB extends AbstractDriver
      */
     public function findOne($criteria = null)
     {
-        $result = $this->getCollection()->findOne(
+        $result = $this->getConnection()->getCollection()->findOne(
             $criteria ?: array(),
             $this->getProperties()
         );
@@ -188,7 +189,7 @@ class MongoDB extends AbstractDriver
      */
     public function find($criteria = null)
     {
-        $cursor = $this->getCollection()->find(
+        $cursor = $this->getConnection()->getCollection()->find(
             $criteria ?: array(),
             $this->getProperties()
         );
@@ -227,7 +228,7 @@ class MongoDB extends AbstractDriver
             return $this;
         }
 
-        $this->getCollection()->update(
+        $this->getConnection()->getCollection()->update(
             array('_id' => $id),
             array('$inc' => array($query => $inc)),
             $this->getOptions(array(
@@ -260,7 +261,7 @@ class MongoDB extends AbstractDriver
 
         $method = $ifNotExists ? '$addToSet' : '$push';
 
-        $this->getCollection()->update(
+        $this->getConnection()->getCollection()->update(
             array('_id' => $id),
             array($method => array($query => $value)),
             $this->getOptions(array(
@@ -289,7 +290,7 @@ class MongoDB extends AbstractDriver
             return $this;
         }
 
-        $this->getCollection()->update(
+        $this->getConnection()->getCollection()->update(
             array('_id' => $id),
             array('$pull' => array($query => $value)),
             $this->getOptions(array(

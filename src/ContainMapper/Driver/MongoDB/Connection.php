@@ -56,6 +56,11 @@ class Connection implements ConnectionInterface
     protected $databaseName;
 
     /**
+     * @var MongoDB
+     */
+    protected $database;
+
+    /**
      * Constructor
      *
      * @param   Mongo                       Mongo Database Connection Instance
@@ -65,8 +70,8 @@ class Connection implements ConnectionInterface
      */
     public function __construct(Mongo $connection, $databaseName, $collectionName)
     {
-        $this->databaseName = $database;
-        $this->collectionName = $collection;
+        $this->databaseName = $databaseName;
+        $this->collectionName = $collectionName;
         $this->connection = $connection;
     }
 
