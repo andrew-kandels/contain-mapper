@@ -86,7 +86,7 @@ class Driver extends ContainMapper\Driver\AbstractDriver
             return false;
         }
 
-        return json_decode(file_get_contents($file));
+        return json_decode(file_get_contents($file), true);
     }
 
     /**
