@@ -93,6 +93,9 @@ class Mapper extends Service\AbstractService
         $entity = new $this->entity($data);
         $entity->persisted()->clean();
 
+        $this->getEventManager()->trigger('hydrate.post', $entity);
+        $this->clean();
+
         return $entity;
     }
 
@@ -105,7 +108,7 @@ class Mapper extends Service\AbstractService
      */
     public function findOne($criteria = array())
     {
-        if ($entity = $this->driver->findOne($criteria)) {
+        if ($entity = $this->prepare($this->driver)->findOne($criteria)) {
             return $this->hydrate($entity);
         }
 
@@ -121,7 +124,7 @@ class Mapper extends Service\AbstractService
      */
     public function find($criteria = array())
     {
-        if ($entities = $this->driver->find($criteria)) {
+        if ($entities = $this->prepare($this->driver)->find($criteria)) {
             foreach ($entities as $index => $entity) {
                 $entities[$index] = $this->hydrate($entity);
             }
@@ -135,12 +138,18 @@ class Mapper extends Service\AbstractService
     /**
      * Deletes an entity from the data source driver by some criteria.
      *
-     * @param   mixed                                   Criteria
+     * @param   Contain\Entity\EntityInterface
      * @return  $this
      */
-    public function delete($criteria = array())
+    public function delete($entity)
     {
-        $this->driver->delete($criteria);
+        $this->getEventManager()->trigger('delete.pre', $entity);
+
+        $this->prepare($this->driver)->delete($entity);
+        $entity->persisted()->clean();
+
+        $this->getEventManager()->trigger('delete.post', $entity);
+
         return $this;
     }
 
@@ -157,7 +166,14 @@ class Mapper extends Service\AbstractService
             return $this;
         }
 
-        $this->driver->persist($entity);
+        $mode = $entity->isPersisted() ? 'update' : 'insert';
+
+        $this->getEventManager()->trigger($mode . '.pre', $entity);
+
+        $this->prepare($this->driver)->persist($entity);
+        $entity->persisted()->clean();
+
+        $this->getEventManager()->trigger($mode . '.post', $entity);
 
         return $this;
     }
@@ -175,5 +191,98 @@ class Mapper extends Service\AbstractService
     {
         $resolver = new Resolver($query);
         return $resolver->scan($entity);
+    }
+
+    /**
+     * Increments a numerical property.
+     *
+     * @param   Contain\Entity\EntityInterface  Entity to persist
+     * @param   string                          Query to resolve path to numeric property
+     * @param   integer                         Amount to increment by
+     * @return  $this
+     */
+    public function increment(EntityInterface $entity, $query, $inc)
+    {
+        if (!$entity->isPersisted()) {
+            throw new Exception\InvalidArgumentException('Cannot increment properties as $entity '
+                . 'has not been persisted.'
+            );
+        }
+
+        $resolver = $this->resolve($entity, $query)
+                         ->assertType('Contain\Entity\Property\Type\IntegerType');
+
+
+        $property = $resolver->getEntity()->property($resolver->getProperty());
+        $this->getEventManager()->trigger('update.pre', $resolver->getEntity());
+        $property->setValue($property->getValue() + $inc);
+
+        $this->prepare($this->driver)->increment($entity, $query, $inc);
+        $this->getEventManager()->trigger('update.post', $resolver->getEntity());
+        $resolver->getEntity()->clean($resolver->getProperty());
+
+        return $this;
+    }
+
+    /**
+     * Appends one value to the end of a ListType, optionally if it doesn't
+     * exist only. In MongoDB this is an atomic operation.
+     *
+     * @param   Contain\Entity\EntityInterface  Entity to persist
+     * @param   string                          Query to resolve which should point to a ListType
+     * @param   mixed|array                     Value to append
+     * @param   boolean                         Only add if it doesn't exist
+     * @return  $this
+     */
+    public function push(EntityInterface $entity, $query, $value, $ifNotExists = false)
+    {
+        if (!$entity->isPersisted()) {
+            throw new Exception\InvalidArgumentException('Cannot push to $entity as this is an update operation '
+                . 'and $entity has not been persisted.'
+            );
+        }
+
+        $resolver = $this->resolve($entity, $query)
+                 ->assertType('Contain\Entity\Property\Type\ListType');
+
+        if (count($value = $resolver->getType()->export($value)) != 1) {
+            throw new InvalidArgumentException('Multiple values passed to ' . __METHOD__ . ' not allowed.');
+        }
+
+        $this->prepare($this->driver)->push($entity, $query, $value, $ifNotExists);
+        $this->getEventManager()->trigger('update.post', $resolver->getEntity());
+        $resolver->getEntity()->clean($resolver->getProperty());
+
+        return $this;
+    }
+
+    /**
+     * Removes a value from a ListType. In MongoDB this is an atomic operation.
+     *
+     * @param   Contain\Entity\EntityInterface  Entity to persist
+     * @param   string                          Query to resolve which should point to a ListType
+     * @param   mixed|array                     Value to remove
+     * @return  $this
+     */
+    public function pull(EntityInterface $entity, $query, $value)
+    {
+        if (!$entity->isPersisted()) {
+            throw new Exception\InvalidArgumentException('Cannot push to $entity as this is an update operation '
+                . 'and $entity has not been persisted.'
+            );
+        }
+
+        $resolver = $this->resolve($entity, $query)
+                 ->assertType('Contain\Entity\Property\Type\ListType');
+
+        if (count($value = $resolver->getType()->export($value)) != 1) {
+            throw new InvalidArgumentException('Multiple values passed to ' . __METHOD__ . ' not allowed.');
+        }
+
+        $this->prepare($this->driver)->pull($entity, $query, $value);
+        $this->getEventManager()->trigger('update.post', $resolver->getEntity());
+        $resolver->getEntity()->clean($resolver->getProperty());
+
+        return $this;
     }
 }
