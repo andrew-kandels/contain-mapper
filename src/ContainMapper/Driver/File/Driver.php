@@ -34,22 +34,6 @@ use Contain\Entity\EntityInterface;
 class Driver extends ContainMapper\Driver\AbstractDriver
 {
     /**
-     * @var ContainMapper\Driver\ConnectionInterface
-     */
-    protected $connection;
-
-    /**
-     * Constructor
-     *
-     * @param   ContainMapper\Driver\ConnectionInterface
-     * @return  $this
-     */
-    public function __construct(ContainMapper\Driver\ConnectionInterface $connection)
-    {
-        $this->connection = $connection;
-    }
-
-    /**
      * Persists an entity in MongoDB.
      *
      * @param   EntityInterface                 Entity to persist

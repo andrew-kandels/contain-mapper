@@ -20,6 +20,7 @@
 namespace ContainMapper\Driver;
 
 use ContainMapper;
+use ContainMapper\Exception;
 use Contain\Entity\EntityInterface;
 
 /**
@@ -102,5 +103,30 @@ abstract class AbstractDriver
     {
         // by default, disabled and instead pass to persist
         return $this->persist($entity);
+    }
+
+    /**
+     * Returns the primary key or null if an entity has not been persisted.
+     *
+     * @param   Contain\Entity\EntityInterface
+     * @return  string|null
+     */
+    public function getPrimaryScalarId(EntityInterface $entity)
+    {
+        if (!$primary = $entity->primary()) {
+            $primary = $entity->getExtendedProperty('_id');
+        }
+
+        if (is_array($primary)) {
+            foreach ($primary as $key => $value) {
+                if (!is_scalar($value)) {
+                    throw new Exception\InvalidArgumentException('$entity has a non-scalar primary()');
+                }
+            }
+
+            $primary = implode('', array_values($primary));
+        }
+
+        return ($primary ?: null);
     }
 }

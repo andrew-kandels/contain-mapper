@@ -36,14 +36,9 @@ use MongoId;
 class Connection implements ConnectionInterface
 {
     /**
-     * @var array
+     * @var Mongo
      */
-    protected $config;
-
-    /**
-     * @var MongoDB
-     */
-    protected $database;
+    protected $connection;
 
     /**
      * @var MongoCollection
@@ -56,26 +51,23 @@ class Connection implements ConnectionInterface
     protected $collectionName;
 
     /**
+     * @var string
+     */
+    protected $databaseName;
+
+    /**
      * Constructor
      *
-     * @param   array|Traversable           Configuration
+     * @param   Mongo                       Mongo Database Connection Instance
+     * @param   string                      Name of the MongoDB database
      * @param   string                      Name of the MongoDB collection
      * @return  $this
      */
-    public function __construct($config, $collection)
+    public function __construct(Mongo $connection, $databaseName, $collectionName)
     {
-        if ($config instanceof Traversable) {
-            $config = iterator_to_array($config);
-        }
-
-        if (!is_array($config)) {
-            throw new Exception\InvalidArgumentException('$config should be an array or an '
-                . 'instance of Traversable.'
-            );
-        }
-
-        $this->collection = $collection;
-        $this->config = $config;
+        $this->databaseName = $database;
+        $this->collectionName = $collection;
+        $this->connection = $connection;
     }
 
     /**
@@ -89,7 +81,7 @@ class Connection implements ConnectionInterface
             return $this->database;
         }
 
-        $database = $this->config['database'];
+        $database = $this->databaseName;
         $this->database = $this->getConnection()->$database;
 
         return $this->database;
@@ -119,32 +111,6 @@ class Connection implements ConnectionInterface
      */
     public function getConnection()
     {
-        // already established?
-        if ($this->connection) {
-            return $this->connection;
-        }
-
-        $dsn = 'mongodb://';
-
-        if (!empty($this->config['username']) && !empty($this->config['password'])) {
-            $dsn .= sprintf('%s:%s@',
-                $this->config['username'],
-                $this->config['password']
-            );
-        }
-
-        if (empty($this->config['host'])) {
-            throw new InvalidArgumentException('$config must include a \'host\' key.');
-        }
-
-        $dsn .= $this->config['host'];
-
-        if (!empty($this->config['port'])) {
-            $dsn .= ':' . $this->config['port'];
-        }
-
-        $this->connection = new Mongo($dsn);
-
         return $this->connection;
     }
 
