@@ -21,7 +21,7 @@
     "require": {
         "php": ">=5.3.3",
         "zendframework/zendframework": ">=2.0.0",
-        "contain": "dev-master"
+        "contain": "*"
     },
     "suggest": {
         "phpunit/phpunit": ">=3.7.7",
