@@ -304,4 +304,18 @@ class Driver extends AbstractDriver
 
         return $this;
     }
+
+    /**
+     * Post-hydration callback.
+     *
+     * @param   Contain\Entity\EntityInterface
+     * @param   Values we returned
+     * @return  $this
+     */
+    public function hydrate(EntityInterface $entity, $values)
+    {
+        $entity->setExtendedProperty('_id', $values['_id']);
+
+        return $this;
+    }
 }

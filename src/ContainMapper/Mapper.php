@@ -80,6 +80,16 @@ class Mapper extends Service\AbstractService
     }
 
     /**
+     * Gets the connection for the driver.
+     *
+     * @return  ContainMapper\ConnectionInterface
+     */
+    public function getConnection()
+    {
+        return $this->driver->getConnection();
+    }
+
+    /**
      * Hydrates a driver's result data into an entity.
      *
      * @param   array|Traversable       Raw Database Source Data
@@ -94,7 +104,9 @@ class Mapper extends Service\AbstractService
         $entity = new $this->entity($data);
         $entity->persisted()->clean();
 
-        $this->getEventManager()->trigger('hydrate.post', $entity);
+        $this->driver->hydrate($entity, $data);
+
+        $entity->getEventManager()->trigger('hydrate.post', $entity);
 
         return $entity;
     }
@@ -143,12 +155,12 @@ class Mapper extends Service\AbstractService
      */
     public function delete($entity)
     {
-        $this->getEventManager()->trigger('delete.pre', $entity);
+        $entity->getEventManager()->trigger('delete.pre', $entity);
 
         $this->prepare($this->driver)->delete($entity);
         $entity->clean();
 
-        $this->getEventManager()->trigger('delete.post', $entity);
+        $entity->getEventManager()->trigger('delete.post', $entity);
 
         return $this;
     }
@@ -168,12 +180,12 @@ class Mapper extends Service\AbstractService
 
         $mode = $entity->isPersisted() ? 'update' : 'insert';
 
-        $this->getEventManager()->trigger($mode . '.pre', $entity);
+        $entity->getEventManager()->trigger($mode . '.pre', $entity);
 
         $this->prepare($this->driver)->persist($entity);
         $entity->persisted()->clean();
 
-        $this->getEventManager()->trigger($mode . '.post', $entity);
+        $entity->getEventManager()->trigger($mode . '.post', $entity);
 
         return $this;
     }
@@ -213,11 +225,11 @@ class Mapper extends Service\AbstractService
                          ->assertType('Contain\Entity\Property\Type\IntegerType');
 
         $property = $resolver->getEntity()->property($resolver->getProperty());
-        $this->getEventManager()->trigger('update.pre', $resolver->getEntity());
+        $entity->getEventManager()->trigger('update.pre', $resolver->getEntity());
         $property->setValue($property->getValue() + $inc);
 
         $this->prepare($this->driver)->increment($entity, $query, $inc);
-        $this->getEventManager()->trigger('update.post', $resolver->getEntity());
+        $entity->getEventManager()->trigger('update.post', $resolver->getEntity());
         $resolver->getEntity()->clean($resolver->getProperty());
 
         return $this;
@@ -252,13 +264,13 @@ class Mapper extends Service\AbstractService
         $this->prepare($this->driver)->push($entity, $query, $value, $ifNotExists);
 
         $property = $resolver->getEntity()->property($resolver->getProperty());
-        $this->getEventManager()->trigger('update.pre', $resolver->getEntity());
+        $entity->getEventManager()->trigger('update.pre', $resolver->getEntity());
         $arr = $property->getValue();
         $arr[] = $value;
         $property->setValue($arr);
 
         $resolver->getEntity()->clean($resolver->getProperty());
-        $this->getEventManager()->trigger('update.post', $resolver->getEntity());
+        $entity->getEventManager()->trigger('update.post', $resolver->getEntity());
 
         return $this;
     }
@@ -290,7 +302,7 @@ class Mapper extends Service\AbstractService
         $this->prepare($this->driver)->pull($entity, $query, $value);
 
         $property = $resolver->getEntity()->property($resolver->getProperty());
-        $this->getEventManager()->trigger('update.pre', $resolver->getEntity());
+        $entity->getEventManager()->trigger('update.pre', $resolver->getEntity());
         $arr = $property->getValue();
         foreach ($arr as $index => $val) {
             if ($val === $value) {
@@ -300,7 +312,7 @@ class Mapper extends Service\AbstractService
         }
         $property->setValue(array_merge(array(), $arr));
 
-        $this->getEventManager()->trigger('update.post', $resolver->getEntity());
+        $entity->getEventManager()->trigger('update.post', $resolver->getEntity());
         $resolver->getEntity()->clean($resolver->getProperty());
 
         return $this;
