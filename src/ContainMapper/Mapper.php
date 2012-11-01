@@ -174,13 +174,13 @@ class Mapper extends Service\AbstractService
      */
     public function persist(EntityInterface $entity, $whenNotPersisted = true)
     {
-        if ($whenNotPersisted == true && !$entity->dirty() && $entity->isPersisted()) {
-            return $this;
-        }
-
         $mode = $entity->isPersisted() ? 'update' : 'insert';
 
         $entity->getEventManager()->trigger($mode . '.pre', $entity);
+
+        if ($whenNotPersisted == true && !$entity->dirty() && $entity->isPersisted()) {
+            return $this;
+        }
 
         $this->prepare($this->driver)->persist($entity);
         $entity->persisted()->clean();
