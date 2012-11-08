@@ -87,7 +87,6 @@ class Driver extends AbstractDriver
             }
 
             $primary = new MongoId();
-            $primary = $primary->{'$id'};
         }
 
         $data = $entity->export();
@@ -185,7 +184,7 @@ class Driver extends AbstractDriver
      * Finds multiple entities and returns their data.
      *
      * @param   array               Criteria
-     * @return  array[]
+     * @return  Traversable
      */
     public function find($criteria = null)
     {
@@ -206,12 +205,7 @@ class Driver extends AbstractDriver
             $cursor->skip($this->skip);
         }
 
-        $result = array();
-        foreach ($cursor as $data) {
-            $result[] = $data;
-        }
-
-        return $result;
+        return $cursor;
     }
 
     /**
@@ -306,7 +300,10 @@ class Driver extends AbstractDriver
     }
 
     /**
-     * Post-hydration callback.
+     * Post-hydration callback. Attempts to set the internal _id property 
+     * Mongo uses to identity the primary unique id of the entity, either 
+     * from the Mongo driver if this is an internal invokation or by 
+     * extrapolating it from the primary scalar id.
      *
      * @param   Contain\Entity\EntityInterface
      * @param   Values we returned
@@ -314,7 +311,15 @@ class Driver extends AbstractDriver
      */
     public function hydrate(EntityInterface $entity, $values)
     {
-        $entity->setExtendedProperty('_id', $values['_id']);
+        if (!empty($values['_id'])) {
+            $entity->setExtendedProperty('_id', $values['_id']);
+            return $this;
+        }
+
+        if ($primary = $this->getPrimaryScalarId($entity)) {
+            $entity->setExtendedProperty('_id', $primary);
+            return $this;
+        }
 
         return $this;
     }

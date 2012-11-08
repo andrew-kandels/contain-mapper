@@ -132,19 +132,15 @@ class Mapper extends Service\AbstractService
      * array of hydrated data entities.
      *
      * @param   mixed                                   Query
-     * @return  Contain\Entity\EntityInterface[]        Hydrated data entities
+     * @return  ContainMapper\Cursor
      */
     public function find($criteria = array())
     {
-        if ($entities = $this->prepare($this->driver)->find($criteria)) {
-            foreach ($entities as $index => $entity) {
-                $entities[$index] = $this->hydrate($entity);
-            }
-        } else {
-            $entities = array();
+        if (!$cursor = $this->prepare($this->driver)->find($criteria)) {
+            $cursor = array();
         }
 
-        return $entities;
+        return new Cursor($this, $cursor);
     }
 
     /**
