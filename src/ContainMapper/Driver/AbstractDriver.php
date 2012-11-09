@@ -22,6 +22,7 @@ namespace ContainMapper\Driver;
 use ContainMapper;
 use ContainMapper\Exception;
 use Contain\Entity\EntityInterface;
+use Contain\Entity\Property\Type;
 
 /**
  * MongoDB Driver
@@ -119,6 +120,12 @@ abstract class AbstractDriver
 
         if (is_array($primary)) {
             foreach ($primary as $key => $value) {
+                if (class_exists('MongoId')) {
+                    if ($entity->property($key)->getType() instanceof Type\MongoIdType) {
+                        return new \MongoId();
+                    }
+                }
+
                 if (!is_scalar($value)) {
                     throw new Exception\InvalidArgumentException('$entity has a non-scalar primary()');
                 }
