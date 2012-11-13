@@ -79,18 +79,8 @@ class Driver extends AbstractDriver
      */
     public function persist(EntityInterface $entity)
     {
-        if (!$primary = $this->getPrimaryScalarId($entity)) {
-            if ($entity->primary()) {
-                throw new Exception\InvalidArgumentException('$entity has primary properties '
-                    . 'defined; but has no values assigned'
-                );
-            }
-
-            $primary = new MongoId();
-        }
-
         $data = $entity->export();
-        $data['_id'] = $primary;
+        $primary = $data['_id'] = $this->extractId($entity, $data);
 
         if (!$entity->isPersisted()) {
             $this->getConnection()->getCollection()->insert(
@@ -104,7 +94,7 @@ class Driver extends AbstractDriver
         } else {
             $this->getConnection()->getCollection()->update(
                 array('_id' => $primary),
-                array('$set' => $this->getUpdateCriteria($entity)),
+                $crt = array('$set' => $this->getUpdateCriteria($entity)),
                 $this->getOptions(array(
                     'upsert' => false,
                     'multiple' => false,
@@ -141,7 +131,7 @@ class Driver extends AbstractDriver
     public function delete(EntityInterface $entity)
     {
         // anything to do?
-        if (!$id = $this->getPrimaryScalarId($entity)) {
+        if (!$id = $this->extractId($entity)) {
             return $this;
         }
 
@@ -218,7 +208,7 @@ class Driver extends AbstractDriver
      */
     public function increment(EntityInterface $entity, $query, $inc)
     {
-        if (!$id = $this->getPrimaryScalarId($entity)) {
+        if (!$id = $this->extractId($entity)) {
             return $this;
         }
 
@@ -249,7 +239,7 @@ class Driver extends AbstractDriver
      */
     public function push(EntityInterface $entity, $query, $value, $ifNotExists = false)
     {
-        if (!$id = $this->getPrimaryScalarId($entity)) {
+        if (!$id = $this->extractId($entity)) {
             return $this;
         }
 
@@ -280,7 +270,7 @@ class Driver extends AbstractDriver
      */
     public function pull(EntityInterface $entity, $query, $value)
     {
-        if (!$id = $this->getPrimaryScalarId($entity)) {
+        if (!$id = $this->extractId($entity)) {
             return $this;
         }
 
@@ -316,11 +306,56 @@ class Driver extends AbstractDriver
             return $this;
         }
 
-        if ($primary = $this->getPrimaryScalarId($entity)) {
-            $entity->setExtendedProperty('_id', $primary);
-            return $this;
-        }
+        $this->extractId($entity);
 
         return $this;
+    }
+
+    /**
+     * Pulls out the internal value to use as the primary id and persists it
+     * to the entity's _id extended property.
+     *
+     * @param   Contain\Entity\EntityInterface
+     * @return  mixed
+     */
+    public function extractId(EntityInterface $entity)
+    {
+        if ($entity->getExtendedProperty('_id')) {
+            return $entity->getExtendedProperty('_id');
+        }
+
+        if (!$primary = $entity->primary()) {
+            $entity->setExtendedProperty('_id', $id = new MongoId());
+            return $id;
+        }
+
+        if (count($primary) > 1) {
+            throw new Exception\InvalidArgumentException('MongoDB driver only allows for single '
+                . 'property primary keys'
+            );
+        }
+
+        list($value) = array_values($primary);
+
+        if ($value instanceof MongoId) {
+            $entity->setExtendedProperty('_id', $value);
+            return $value;
+        }
+
+        if (is_object($value)) {
+            $value = (string) $value;
+        }
+
+        if (!is_scalar($value)) {
+            throw new Exception\InvalidArgumentException('MongoDB driver requires that primary '
+                . 'properties are scalar in value with exception to MongoId'
+            );
+        }
+
+        $value = (string) $value;
+
+        $entity->setExtendedProperty('_id', $value);
+
+        return $value;
     }
 }

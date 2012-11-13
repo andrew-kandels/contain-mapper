@@ -120,12 +120,6 @@ abstract class AbstractDriver
 
         if (is_array($primary)) {
             foreach ($primary as $key => $value) {
-                if (class_exists('MongoId')) {
-                    if ($entity->property($key)->getType() instanceof Type\MongoIdType) {
-                        return new \MongoId();
-                    }
-                }
-
                 if (!is_scalar($value)) {
                     throw new Exception\InvalidArgumentException('$entity has a non-scalar primary()');
                 }
