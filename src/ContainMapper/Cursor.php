@@ -105,10 +105,10 @@ class Cursor extends Service\AbstractService implements Iterator
      */
     public function rewind() 
     {
-        $this->position = 0;
         if ($this->cursor instanceof Traversable) {
             $this->cursor->rewind();
         }
+        $this->position = 0;
     }
 
     /**
@@ -148,10 +148,10 @@ class Cursor extends Service\AbstractService implements Iterator
      */
     public function next()
     {
-        ++$this->position;
         if ($this->cursor instanceof Traversable) {
             return $this->cursor->next();
         }
+        ++$this->position;
     }
 
     /**
