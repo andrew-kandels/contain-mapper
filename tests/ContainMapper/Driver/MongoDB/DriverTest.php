@@ -59,12 +59,20 @@ class DriverTest extends \PHPUnit_Framework_TestCase
         $entity2->setFirstName('test2');
         $this->driver->persist($entity2);
 
+        $cursor = $this->driver->find(array('firstName' => array('$in' => array('test1', 'test2', 'test3'))));
+        $this->assertInstanceOf('MongoCursor', $cursor);
+
+        $rows = array();
+        foreach ($cursor as $row) {
+            $rows[] = $row;
+        }
+
         $this->assertEquals(
             array(
                 $entity1->export() + array('_id' => 'test1'),
                 $entity2->export() + array('_id' => 'test2'),
             ),
-            $this->driver->find(array('firstName' => array('$in' => array('test1', 'test2', 'test3'))))
+            $rows
         );
     }
 

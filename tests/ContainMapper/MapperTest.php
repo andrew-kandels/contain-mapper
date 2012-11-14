@@ -51,11 +51,13 @@ class MapperTest extends \PHPUnit_Framework_TestCase
     {
         $this->mapper->persist($this->entity);
         $results = $this->mapper->find(array('string' => 'test'));
-        $this->assertInstanceOf('Contain\Entity\AbstractEntity', $results[0]);
+        $this->assertInstanceOf('Contain\Entity\AbstractEntity', $results->current());
         $this->assertEquals(array($this->entity->export()), array_map(function ($a) {
             return $a->export();
-        }, $results));
-        $this->assertEquals(array(), $this->mapper->find(array('string' => 'doesnotexist')));
+        }, array_values(iterator_to_array($results))));
+        $rs = $this->mapper->find(array('string' => 'doesnotexist'));
+        foreach ($rs as $notFound) { break; }
+        $this->assertTrue(empty($notFound));
     }
 
     public function testDelete()
