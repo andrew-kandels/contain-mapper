@@ -22,8 +22,7 @@ namespace ContainMapper\Driver\MongoDB;
 use ContainMapper\Driver\AbstractDriver;
 use ContainMapper\Exception;
 use Contain\Entity\EntityInterface;
-use Contain\Entity\Property\Type\EntityType;
-use Contain\Entity\Property\Type\ListType;
+use Contain\Entity\Property\Type;
 use MongoId;
 use ContainMapper\Resolver;
 
@@ -38,25 +37,115 @@ use ContainMapper\Resolver;
 class Driver extends AbstractDriver
 {
     /**
+     * @var Contain\Entity\Property\Type\MongoDate
+     */
+    protected $dateType;
+
+    /**
+     * @var Contain\Entity\Property\Type\MongoId
+     */
+    protected $idType;
+
+    /**
+     * Initializes the MongoDate type for converting DateTime types.
+     *
+     * @return  void
+     */
+    public function init()
+    {
+        $this->dateType = new Type\MongoDateType();
+        $this->idType = new Type\MongoIdType();
+    }
+
+    /**
+     * Rewrites the export() output of an entity into a Mongo array.
+     *
+     * @param   Contain\Entity\EntityInterface
+     * @param   boolean                                 Is a sub-document (recursive)
+     * @return  array
+     */
+    public function getInsertCriteria(EntityInterface $entity, $isSubDocument = false)
+    {
+        $properties      = $entity->properties();
+        $data            = $entity->export();
+        $return          = array();
+        $primaryProperty = null;
+        $primaryValue    = $this->extractId($entity);
+
+        if ($primary = array_keys($entity->primary())) {
+            list($primaryProperty) = $primary;
+        }
+
+        foreach ($properties as $name) {
+            $type  = $entity->type($name);
+            $value = $data[$name];
+
+            if ($type instanceof Type\DateTimeType || $type instanceof Type\MongoDateType) {
+                $return[$name] = $this->dateType->parse($value);
+            } elseif ($type instanceof Type\MongoIdType) {
+                $return[$name] = $this->idType->export($value);
+            } elseif ($type instanceof Type\EntityType) {
+                $value = $this->getInsertCriteria($entity->get($name), true);
+                if ($value) {
+                    $return[$name] = $value;
+                }
+            } elseif ($type instanceof Type\ListType) {
+                if ($value) {
+                    $return[$name] = $value;
+                }
+            } else {
+                $return[$name] = $value;
+            }
+
+            // rename the primary property to _id to utilize Mongo's primary and index
+            if (!$isSubDocument && $primaryProperty == $name) {
+                $return['_id'] = $primaryValue;
+                unset($return[$name]);
+            }
+        }
+
+        if (!$isSubDocument && !$primaryProperty) {
+            $return['_id'] = $primaryValue;
+        }
+
+        return $return;
+    }
+
+    /**
      * Rewrites the dirty() output from an entity into something
      * MongoDb can use in an update statement.
      *
      * @param   EntityInterface     Reference entity
+     * @param   boolean                                 Is a sub-document (recursive)
      * @return  array
      */
-    public function getUpdateCriteria(EntityInterface $entity)
+    public function getUpdateCriteria(EntityInterface $entity, $isSubDocument = false)
     {
         $dirty = $result = array();
-        
+        $primaryProperty = null;
+        $primaryValue    = $this->extractId($entity);
+
+        if ($primary = array_keys($entity->primary())) {
+            list($primaryProperty) = $primary;
+        }
+
         if ($properties = $entity->dirty()) {
             $dirty = $entity->export($properties);
         }
 
         foreach ($dirty as $property => $value) {
+            if (!$isSubDocument && $primaryProperty == $property) {
+                continue;
+            }
+
             $type = $entity->type($property);
 
+            if ($type instanceof Type\DateTimeType) {
+                $value = $this->dateType->export($value);               
+            }
+
             // child entity
-            if ($type instanceof EntityType) {
+            if ($type instanceof Type\EntityType) {
                 $child = $entity->property($property)->getValue();
                 $sub   = $this->getUpdateCriteria($child);
 
@@ -79,12 +168,11 @@ class Driver extends AbstractDriver
      */
     public function persist(EntityInterface $entity)
     {
-        $data = $entity->export();
-        $primary = $data['_id'] = $this->extractId($entity, $data);
+        $primary = $this->extractId($entity);
 
         if (!$entity->isPersisted()) {
             $this->getConnection()->getCollection()->insert(
-                $data,
+                $this->getInsertCriteria($entity),
                 $this->getOptions(array(
                     'safe'    => false,
                     'fsync'   => false,
@@ -303,6 +391,12 @@ class Driver extends AbstractDriver
     {
         if (!empty($values['_id'])) {
             $entity->setExtendedProperty('_id', $values['_id']);
+
+            if ($primary = array_keys($entity->primary())) {
+                list($primaryProperty) = $primary;
+                $entity->set($primaryProperty, $values['_id']);
+            }
+
             return $this;
         }
 
@@ -351,8 +445,6 @@ class Driver extends AbstractDriver
                 . 'properties are scalar in value with exception to MongoId'
             );
         }
-
-        $value = (string) $value;
 
         $entity->setExtendedProperty('_id', $value);
 

@@ -50,6 +50,10 @@ abstract class AbstractDriver
     public function __construct(ConnectionInterface $connection)
     {
         $this->connection = $connection;
+
+        if (method_exists($this, 'init')) {
+            $this->init();
+        }
     }
 
     /**
