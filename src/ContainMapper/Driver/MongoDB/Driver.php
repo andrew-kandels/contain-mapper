@@ -69,11 +69,14 @@ class Driver extends AbstractDriver
         $properties      = $entity->properties();
         $data            = $entity->export();
         $return          = array();
-        $primaryProperty = null;
-        $primaryValue    = $this->extractId($entity);
 
-        if ($primary = array_keys($entity->primary())) {
-            list($primaryProperty) = $primary;
+        if (!$isSubDocument) {
+            $primaryProperty = null;
+            $primaryValue    = $this->extractId($entity);
+
+            if ($primary = array_keys($entity->primary())) {
+                list($primaryProperty) = $primary;
+            }
         }
 
         foreach ($properties as $name) {
@@ -172,7 +175,7 @@ class Driver extends AbstractDriver
 
         if (!$entity->isPersisted()) {
             $this->getConnection()->getCollection()->insert(
-                $this->getInsertCriteria($entity),
+                $data = $this->getInsertCriteria($entity),
                 $this->getOptions(array(
                     'safe'    => false,
                     'fsync'   => false,
@@ -430,6 +433,12 @@ class Driver extends AbstractDriver
         }
 
         list($value) = array_values($primary);
+
+        if (!$value) {
+            throw new Exception\InvalidArgumentException('Primary key column contains null or '
+                . 'empty value'
+            );
+        }
 
         if ($value instanceof MongoId) {
             $entity->setExtendedProperty('_id', $value);
