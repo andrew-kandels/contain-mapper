@@ -150,7 +150,7 @@ class Driver extends AbstractDriver
             // child entity
             if ($type instanceof Type\EntityType) {
                 $child = $entity->property($property)->getValue();
-                $sub   = $this->getUpdateCriteria($child);
+                $sub   = $this->getUpdateCriteria($child, true);
 
                 foreach ($sub as $subProperty => $subValue) {
                     $result[$property . '.' . $subProperty] = $subValue;
