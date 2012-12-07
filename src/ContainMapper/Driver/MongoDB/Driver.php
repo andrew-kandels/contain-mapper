@@ -124,7 +124,8 @@ class Driver extends AbstractDriver
      */
     public function getUpdateCriteria(EntityInterface $entity, $isSubDocument = false)
     {
-        $dirty = $result = array();
+        $dirty = array();
+        $result = array('$set' => array());
         $primaryProperty = null;
         $primaryValue    = $this->extractId($entity);
 
@@ -150,17 +151,54 @@ class Driver extends AbstractDriver
             // child entity
             if ($type instanceof Type\EntityType) {
                 $child = $entity->property($property)->getValue();
-                $sub   = $this->getUpdateCriteria($child, true);
 
-                foreach ($sub as $subProperty => $subValue) {
-                    $result[$property . '.' . $subProperty] = $subValue;
+                // if an entity is cleared out and marked as dirty, unset the mongo property
+                if ($this->isDirtyEntityEmpty($child)) {
+                    if (!isset($result['$unset'])) {
+                        $result['$unset'] = array();
+                    }
+                    $result['$unset'][$property] = true;
+                } else {
+                    $sub = $this->getUpdateCriteria($child, true);
+
+                    if (isset($sub['$set'])) {
+                        foreach ($sub['$set'] as $subProperty => $subValue) {
+                            $result['$set'][$property . '.' . $subProperty] = $subValue;
+                        }
+                    }
                 }
             } else {
-                $result[$property] = $value;
+                $result['$set'][$property] = $value;
             }
         }
 
+        if (empty($result['$set'])) {
+            unset($result['$set']);
+        }
+
         return $result;
+    }
+
+    /**
+     * Recursively checks to see if a dirty entity is empty and contains only
+     * other likewise empty entities to qualify it for being $unset.
+     *
+     * @param   Contain\Entity\EntityInterface
+     * @return  boolean
+     */
+    protected function isDirtyEntityEmpty(EntityInterface $entity)
+    {
+        $props = $entity->export($entity->dirty());
+
+        foreach ($props as $property => $value) {
+            if (!$entity->type($property) instanceof Type\EntityType) {
+                return false;
+            }
+
+            return $this->isDirtyEntityEmpty($entity->get($property));
+        }
+
+        return true;
     }
 
     /**
@@ -185,7 +223,7 @@ class Driver extends AbstractDriver
         } else {
             $this->getConnection()->getCollection()->update(
                 array('_id' => $primary),
-                $crt = array('$set' => $this->getUpdateCriteria($entity)),
+                $this->getUpdateCriteria($entity),
                 $this->getOptions(array(
                     'upsert' => false,
                     'multiple' => false,
