@@ -188,7 +188,13 @@ class Driver extends AbstractDriver
      */
     protected function isDirtyEntityEmpty(EntityInterface $entity)
     {
-        $props = $entity->export($entity->dirty());
+        if (!$entity->dirty()) {
+            return false;
+        }
+
+        if (!$props = $entity->export($entity->dirty())) {
+            return false;
+        }
 
         foreach ($props as $property => $value) {
             if (!$entity->type($property) instanceof Type\EntityType) {
