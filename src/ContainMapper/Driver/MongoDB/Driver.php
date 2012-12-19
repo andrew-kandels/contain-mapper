@@ -227,9 +227,15 @@ class Driver extends AbstractDriver
                 ))
             );
         } else {
+            if (!$criteria = $this->getUpdateCriteria($entity)) {
+                // nothing to do, saving with array() will wipe out the record and
+                // $set => array() will throw an error
+                return $this;
+            }
+
             $this->getConnection()->getCollection()->update(
                 array('_id' => $primary),
-                $this->getUpdateCriteria($entity),
+                $criteria,
                 $this->getOptions(array(
                     'upsert' => false,
                     'multiple' => false,
