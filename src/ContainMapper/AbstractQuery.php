@@ -267,4 +267,52 @@ abstract class AbstractQuery
     {
         return $this->properties;
     }
+
+    /**
+     * Imports all internal options in a format created by export().
+     *
+     * @param   array                           Exported values
+     * @return  $this
+     */
+    public function fromArray(array $mp)
+    {
+        if (isset($mp['properties'])) {
+            $this->properties($mp['properties']);
+        }
+
+        if (isset($mp['options'])) {
+            $this->setOptions($mp['options']);
+        }
+
+        if (isset($mp['limit'])) {
+            $this->setLimit($mp['limit']);
+        }
+
+        if (isset($mp['skip'])) {
+            $this->setSkip($mp['skip']);
+        }
+
+        if (isset($mp['sort'])) {
+            $this->setSort($mp['sort']);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Exports all internal options. Primarily used for debugging and for 
+     * injecting one query objects parameters into another.
+     *
+     * @return  array
+     */
+    public function export()
+    {
+        return array(
+            'properties' => $this->getProperties(),
+            'sort' => $this->getSort(),
+            'limit' => $this->getLimit(),
+            'skip' => $this->getSkip(),
+            'options' => $this->getOptions(),
+        );
+    }
 }

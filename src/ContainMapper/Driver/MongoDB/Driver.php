@@ -145,7 +145,7 @@ class Driver extends AbstractDriver
             $type = $entity->type($property);
 
             if ($type instanceof Type\DateTimeType) {
-                $value = $this->dateType->export($value);               
+                $value = $this->dateType->parse($value);               
             }
 
             // child entity
