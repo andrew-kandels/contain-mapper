@@ -137,6 +137,8 @@ class Driver extends AbstractDriver
             $dirty = $entity->export($properties);
         }
 
+        defined('FUCK') && die(var_dump($dirty));
+
         foreach ($dirty as $property => $value) {
             if (!$isSubDocument && $primaryProperty == $property) {
                 continue;
@@ -175,6 +177,8 @@ class Driver extends AbstractDriver
         if (empty($result['$set'])) {
             unset($result['$set']);
         }
+
+        defined('FUCK') && die(var_dump($result));
 
         return $result;
     }
