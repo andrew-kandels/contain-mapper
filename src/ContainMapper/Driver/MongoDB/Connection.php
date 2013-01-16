@@ -22,6 +22,7 @@ namespace ContainMapper\Driver\MongoDB;
 use Traversable;
 use ContainMapper\Exception;
 use Mongo;
+use MongoClient;
 use ContainMapper\Driver\ConnectionInterface;
 use MongoId;
 
@@ -68,11 +69,18 @@ class Connection implements ConnectionInterface
      * @param   string                      Name of the MongoDB collection
      * @return  $this
      */
-    public function __construct(Mongo $connection, $databaseName, $collectionName)
+    public function __construct($connection, $databaseName, $collectionName)
     {
         $this->databaseName = $databaseName;
         $this->collectionName = $collectionName;
         $this->connection = $connection;
+
+        if (!$this->connection instanceof Mongo &&
+            !$this->connection instanceof MongoClient) {
+            throw new RuntimeException('$connection must be an instance of Mongo or '
+                . 'MongoClient'
+            );
+        }
     }
 
     /**
