@@ -50,6 +50,11 @@ class Cursor extends Service\AbstractService implements Iterator
     protected $position;
 
     /**
+     * @var Contain\Entity\EntityInterface
+     */
+    protected $entity;
+
+    /**
      * Constructor
      *
      * @param   ContainMapper\Mapper
@@ -91,9 +96,15 @@ class Cursor extends Service\AbstractService implements Iterator
     {
         $return = array();
 
+        // disable object re-use
+        $this->entity = false;
+
         foreach ($this as $item) {
             $return[] = $item;
         }
+
+        // re-enable it
+        $this->entity = null;
 
         return $return;
     }
@@ -112,6 +123,20 @@ class Cursor extends Service\AbstractService implements Iterator
     }
 
     /**
+     * Returns a count of items.
+     *
+     * @return  integer
+     */
+    public function count()
+    {
+        if (is_array($this->cursor)) {
+            return count($this->cursor);
+        }
+
+        return iterator_count($this->cursor);
+    }
+
+    /**
      * Get current item
      *
      * @return  mixed
@@ -124,7 +149,14 @@ class Cursor extends Service\AbstractService implements Iterator
             $entity = $this->cursor[$this->position];
         }
 
-        return $this->mapper->hydrate($entity);
+        $return = $this->mapper->hydrate($entity, $this->entity !== false ? $this->entity : null);
+
+        // be memory efficient and reuse this entity for the next iteration
+        if ($this->entity === null) {
+            $this->entity = $return;
+        }
+
+        return $return;
     }
 
     /**

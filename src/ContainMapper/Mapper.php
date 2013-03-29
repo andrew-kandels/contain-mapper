@@ -47,14 +47,14 @@ class Mapper extends Service\AbstractService
     /**
      * Constructor
      *
+     * @param   string                                  Entity Classname this mapper hydrates
      * @param   ContainMapper\Driver\DriverInterface
-     * @param   Full classname of the entity this mapper is responsible for hydrating
      * @return  $this
      */
-    public function __construct(Driver\AbstractDriver $driver, $entity)
+    public function __construct($entity, Driver\AbstractDriver $driver = null)
     {
-        $this->driver = $driver;
         $this->entity = $entity;
+        $this->driver = $driver;
     }
 
     /**
@@ -76,6 +76,12 @@ class Mapper extends Service\AbstractService
      */
     public function getDriver()
     {
+        if (!$this->driver) {
+            throw new Exception\InvalidArgumentException('Cannot perform action requiring a driver without '
+                . 'a driver being injected.'
+            );
+        }
+
         return $this->driver;
     }
 
@@ -92,19 +98,28 @@ class Mapper extends Service\AbstractService
     /**
      * Hydrates a driver's result data into an entity.
      *
-     * @param   array|Traversable       Raw Database Source Data
+     * @param   array|Traversable                   Raw Database Source Data
+     * @param   Contain\Entity\EntityInterface      Entity to hydrate the data into (as opposed to creating a new object)
      * @return  Contain\Entity\EntityInterface
      */
-    public function hydrate($data = array())
+    public function hydrate($data = array(), EntityInterface $entity = null)
     {
         if ($data instanceof Traversable) {
             $data = iterator_to_array($data);
         }
 
-        $entity = new $this->entity($data);
+        if ($entity) {
+            $entity->reset()->fromArray($data);
+        } else {
+            $entity = new $this->entity($data);
+        }
+
         $entity->persisted()->clean();
 
-        $this->driver->hydrate($entity, $data);
+        // you can hydrate without a driver
+        if ($this->driver) {
+            $this->getDriver()->hydrate($entity, $data);
+        }
 
         $entity->getEventManager()->trigger('hydrate.post', $entity);
 
@@ -120,7 +135,7 @@ class Mapper extends Service\AbstractService
      */
     public function findOne($criteria = array())
     {
-        if ($entity = $this->prepare($this->driver)->findOne($criteria)) {
+        if ($entity = $this->prepare($this->getDriver())->findOne($criteria)) {
             return $this->hydrate($entity);
         }
 
@@ -136,7 +151,7 @@ class Mapper extends Service\AbstractService
      */
     public function find($criteria = array())
     {
-        if (!$cursor = $this->prepare($this->driver)->find($criteria)) {
+        if (!$cursor = $this->prepare($this->getDriver())->find($criteria)) {
             $cursor = array();
         }
 
@@ -153,7 +168,7 @@ class Mapper extends Service\AbstractService
     {
         $entity->getEventManager()->trigger('delete.pre', $entity);
 
-        $this->prepare($this->driver)->delete($entity);
+        $this->prepare($this->getDriver())->delete($entity);
         $entity->clean();
 
         $entity->getEventManager()->trigger('delete.post', $entity);
@@ -178,7 +193,7 @@ class Mapper extends Service\AbstractService
             return $this;
         }
 
-        $this->prepare($this->driver)->persist($entity);
+        $this->prepare($this->getDriver())->persist($entity);
         $entity->persisted()->clean();
 
         $entity->getEventManager()->trigger($mode . '.post', $entity);
@@ -224,7 +239,7 @@ class Mapper extends Service\AbstractService
         $entity->getEventManager()->trigger('update.pre', $resolver->getEntity());
         $property->setValue($property->getValue() + $inc);
 
-        $this->prepare($this->driver)->increment($entity, $query, $inc);
+        $this->prepare($this->getDriver())->increment($entity, $query, $inc);
         $entity->getEventManager()->trigger('update.post', $resolver->getEntity());
         $resolver->getEntity()->clean($resolver->getProperty());
 
@@ -252,16 +267,22 @@ class Mapper extends Service\AbstractService
         $resolver = $this->resolve($entity, $query)
                  ->assertType('Contain\Entity\Property\Type\ListType');
 
-        if (count($value = $resolver->getType()->export($value)) != 1) {
+        if (count($value = $resolver->getType()->export(array($value))) != 1) {
             throw new InvalidArgumentException('Multiple values passed to ' . __METHOD__ . ' not allowed.');
         }
+
         list($value) = $value; // remove outer array
 
-        $this->prepare($this->driver)->push($entity, $query, $value, $ifNotExists);
+        $this->prepare($this->getDriver())->push($entity, $query, $value, $ifNotExists);
 
         $property = $resolver->getEntity()->property($resolver->getProperty());
         $entity->getEventManager()->trigger('update.pre', $resolver->getEntity());
-        $arr = $property->getValue();
+        $arr = $property->getValue() ?: array();
+
+        if ($arr instanceof \ContainMapper\Cursor) {
+            $arr = $arr->export();
+        }
+
         $arr[] = $value;
         $property->setValue($arr);
 
@@ -295,7 +316,7 @@ class Mapper extends Service\AbstractService
         }
         list($value) = $value; // remove outer array
 
-        $this->prepare($this->driver)->pull($entity, $query, $value);
+        $this->prepare($this->getDriver())->pull($entity, $query, $value);
 
         $property = $resolver->getEntity()->property($resolver->getProperty());
         $entity->getEventManager()->trigger('update.pre', $resolver->getEntity());

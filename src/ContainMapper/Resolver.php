@@ -101,6 +101,10 @@ class Resolver
         $this->value    = $this->lookupPropertyValue($this->entity, $this->property);
         $this->type     = $this->entity->type($this->property);
 
+        if ($this->value instanceof \ContainMapper\Cursor) {
+            $this->value = $this->value->toArray();
+        }
+
         if (!$parts) {
             return $this;
         }
