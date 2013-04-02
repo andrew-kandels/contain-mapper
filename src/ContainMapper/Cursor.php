@@ -151,6 +151,10 @@ class Cursor extends Service\AbstractService implements Iterator
 
         $return = $this->mapper->hydrate($entity, $this->entity !== false ? $this->entity : null);
 
+        $this->getEventManager()->trigger('hydrate', $return, array(
+            'index' => $this->position,
+        ));
+
         // be memory efficient and reuse this entity for the next iteration
         if ($this->entity === null) {
             $this->entity = $return;

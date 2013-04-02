@@ -94,7 +94,7 @@ abstract class AbstractService extends ContainMapper\AbstractQuery
      * @param   Zend\EventManager\EventManager
      * @return  $this
      */
-    public function setEventManager(EventManager $eventManager)
+    public function setEventManager(EventManager $eventManager = null)
     {
         $this->eventManager = $eventManager;
         return $this;
