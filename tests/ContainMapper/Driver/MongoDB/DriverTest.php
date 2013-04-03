@@ -23,8 +23,9 @@ class DriverTest extends \PHPUnit_Framework_TestCase
     public function testPersist()
     {
         $this->assertSame($this->driver, $this->driver->persist($this->entity));
-        $data = $this->driver->findOne(array('firstName' => 'test'));
-        $this->assertEquals($this->entity->export() + array('_id' => 'test'), $data); 
+        $data = $this->driver->findOne(array('_id' => 'test'));
+        $this->assertEquals($this->entity->export(), array('firstName' => 'test')); 
+        $this->assertEquals('test', $this->entity->getExtendedProperty('_id')); 
     }
 
     public function testPersistAutoId()
@@ -38,15 +39,17 @@ class DriverTest extends \PHPUnit_Framework_TestCase
     {
         $this->driver->persist($this->entity);
         $data = $this->driver->findOne(array('firstName' => 'test'));
-        $this->assertEquals($this->entity->export() + array('_id' => 'test'), $data); 
         $this->driver->delete($this->entity);
-        $this->assertFalse($this->driver->findOne(array('firstName' => 'test')));
+        $this->assertFalse($this->driver->findOne(array('_id' => 'test')));
     }
 
     public function testFindOne()
     {
         $this->driver->persist($this->entity);
-        $this->assertEquals($this->entity->export() + array('_id' => 'test'), $this->driver->findOne(array('firstName' => 'test')));
+        $this->assertEquals(
+            array('_id' => 'test'),
+            $this->driver->findOne(array('_id' => 'test'))
+        );
     }
 
     public function testFind()
@@ -59,7 +62,7 @@ class DriverTest extends \PHPUnit_Framework_TestCase
         $entity2->setFirstName('test2');
         $this->driver->persist($entity2);
 
-        $cursor = $this->driver->find(array('firstName' => array('$in' => array('test1', 'test2', 'test3'))));
+        $cursor = $this->driver->find(array('_id' => array('$in' => array('test1', 'test2', 'test3'))));
         $this->assertInstanceOf('MongoCursor', $cursor);
 
         $rows = array();
@@ -69,8 +72,8 @@ class DriverTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(
             array(
-                $entity1->export() + array('_id' => 'test1'),
-                $entity2->export() + array('_id' => 'test2'),
+                array('_id' => 'test1'),
+                array('_id' => 'test2'),
             ),
             $rows
         );
@@ -80,10 +83,10 @@ class DriverTest extends \PHPUnit_Framework_TestCase
     {
         $entity1 = new SampleMultiTypeEntity(array('string' => 'test1', 'entity' => $this->entity));
         $this->assertEquals(
-            array(
+            array('$set' => array(
                 'string' => 'test1',
                 'entity.firstName' => 'test',
-            ), 
+            )), 
             $this->driver->getUpdateCriteria($entity1)
         );
         $entity1->clean();

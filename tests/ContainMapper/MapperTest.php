@@ -15,7 +15,7 @@ class MapperTest extends \PHPUnit_Framework_TestCase
         $db->test->test->drop();
         $connection = new \ContainMapper\Driver\MongoDB\Connection($db, 'test', 'test');
         $driver = new \ContainMapper\Driver\MongoDB\Driver($connection);
-        $this->mapper = new \ContainMapper\Mapper($driver, 'ContainTest\Entity\SampleMultiTypeEntity');
+        $this->mapper = new \ContainMapper\Mapper('ContainTest\Entity\SampleMultiTypeEntity', $driver);
         $this->entity = new SampleMultiTypeEntity(array('string' => 'test'));
     }
 
@@ -65,12 +65,12 @@ class MapperTest extends \PHPUnit_Framework_TestCase
         $this->mapper->persist($this->entity);
 
         $pre = new \stdclass();
-        $this->entity->getEventManager()->attach('delete.pre', function () use ($pre) {
+        $this->entity->attach('delete.pre', function () use ($pre) {
             $pre->called = true;
         });
 
         $post = new \stdclass();
-        $this->entity->getEventManager()->attach('delete.post', function () use ($post) {
+        $this->entity->attach('delete.post', function () use ($post) {
             $post->called = true;
         });
 
@@ -102,12 +102,12 @@ class MapperTest extends \PHPUnit_Framework_TestCase
     public function testPersistNotDirtyButFlag()
     {
         $pre = new \stdclass();
-        $this->entity->getEventManager()->attach('insert.pre', function () use ($pre) {
+        $this->entity->attach('insert.pre', function () use ($pre) {
             $pre->called = true;
         });
 
         $post = new \stdclass();
-        $this->entity->getEventManager()->attach('insert.post', function () use ($post) {
+        $this->entity->attach('insert.post', function () use ($post) {
             $post->called = true;
         });
 
@@ -120,12 +120,12 @@ class MapperTest extends \PHPUnit_Framework_TestCase
     public function testPersist()
     {
         $pre = new \stdclass();
-        $this->entity->getEventManager()->attach('insert.pre', function () use ($pre) {
+        $this->entity->attach('insert.pre', function () use ($pre) {
             $pre->called = true;
         });
 
         $post = new \stdclass();
-        $this->entity->getEventManager()->attach('insert.post', function () use ($post) {
+        $this->entity->attach('insert.post', function () use ($post) {
             $post->called = true;
         });
 
@@ -137,12 +137,12 @@ class MapperTest extends \PHPUnit_Framework_TestCase
     public function testPersistUpdate()
     {
         $pre = new \stdclass();
-        $this->entity->getEventManager()->attach('update.pre', function () use ($pre) {
+        $this->entity->attach('update.pre', function () use ($pre) {
             $pre->called = true;
         });
 
         $post = new \stdclass();
-        $this->entity->getEventManager()->attach('update.post', function () use ($post) {
+        $this->entity->attach('update.post', function () use ($post) {
             $post->called = true;
         });
 
@@ -190,12 +190,12 @@ class MapperTest extends \PHPUnit_Framework_TestCase
     public function testIncrement()
     {
         $pre = new \stdclass();
-        $this->entity->getEventManager()->attach('update.pre', function () use ($pre) {
+        $this->entity->attach('update.pre', function () use ($pre) {
             $pre->called = true;
         });
 
         $post = new \stdclass();
-        $this->entity->getEventManager()->attach('update.post', function () use ($post) {
+        $this->entity->attach('update.post', function () use ($post) {
             $post->called = true;
         });
 
@@ -212,12 +212,12 @@ class MapperTest extends \PHPUnit_Framework_TestCase
     public function testPush()
     {
         $pre = new \stdclass();
-        $this->entity->getEventManager()->attach('update.pre', function () use ($pre) {
+        $this->entity->attach('update.pre', function () use ($pre) {
             $pre->called = true;
         });
 
         $post = new \stdclass();
-        $this->entity->getEventManager()->attach('update.post', function () use ($post) {
+        $this->entity->attach('update.post', function () use ($post) {
             $post->called = true;
         });
 
@@ -234,12 +234,12 @@ class MapperTest extends \PHPUnit_Framework_TestCase
     public function testPull()
     {
         $pre = new \stdclass();
-        $this->entity->getEventManager()->attach('update.pre', function () use ($pre) {
+        $this->entity->attach('update.pre', function () use ($pre) {
             $pre->called = true;
         });
 
         $post = new \stdclass();
-        $this->entity->getEventManager()->attach('update.post', function () use ($post) {
+        $this->entity->attach('update.post', function () use ($post) {
             $post->called = true;
         });
 

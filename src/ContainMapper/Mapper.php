@@ -121,7 +121,7 @@ class Mapper extends Service\AbstractService
             $this->getDriver()->hydrate($entity, $data);
         }
 
-        $entity->getEventManager()->trigger('hydrate.post', $entity);
+        $entity->trigger('hydrate.post');
 
         return $entity;
     }
@@ -166,12 +166,12 @@ class Mapper extends Service\AbstractService
      */
     public function delete($entity)
     {
-        $entity->getEventManager()->trigger('delete.pre', $entity);
+        $entity->trigger('delete.pre');
 
         $this->prepare($this->getDriver())->delete($entity);
         $entity->clean();
 
-        $entity->getEventManager()->trigger('delete.post', $entity);
+        $entity->trigger('delete.post');
 
         return $this;
     }
@@ -187,7 +187,7 @@ class Mapper extends Service\AbstractService
     {
         $mode = $entity->isPersisted() ? 'update' : 'insert';
 
-        $entity->getEventManager()->trigger($mode . '.pre', $entity);
+        $entity->trigger($mode . '.pre');
 
         if ($whenNotPersisted == true && !$entity->dirty() && $entity->isPersisted()) {
             return $this;
@@ -196,7 +196,7 @@ class Mapper extends Service\AbstractService
         $this->prepare($this->getDriver())->persist($entity);
         $entity->persisted()->clean();
 
-        $entity->getEventManager()->trigger($mode . '.post', $entity);
+        $entity->trigger($mode . '.post');
 
         return $this;
     }
@@ -236,11 +236,11 @@ class Mapper extends Service\AbstractService
                          ->assertType('Contain\Entity\Property\Type\IntegerType');
 
         $property = $resolver->getEntity()->property($resolver->getProperty());
-        $entity->getEventManager()->trigger('update.pre', $resolver->getEntity());
+        $entity->trigger('update.pre');
         $property->setValue($property->getValue() + $inc);
 
         $this->prepare($this->getDriver())->increment($entity, $query, $inc);
-        $entity->getEventManager()->trigger('update.post', $resolver->getEntity());
+        $entity->trigger('update.post');
         $resolver->getEntity()->clean($resolver->getProperty());
 
         return $this;
@@ -276,7 +276,7 @@ class Mapper extends Service\AbstractService
         $this->prepare($this->getDriver())->push($entity, $query, $value, $ifNotExists);
 
         $property = $resolver->getEntity()->property($resolver->getProperty());
-        $entity->getEventManager()->trigger('update.pre', $resolver->getEntity());
+        $entity->trigger('update.pre');
         $arr = $property->getValue() ?: array();
 
         if ($arr instanceof \ContainMapper\Cursor) {
@@ -287,7 +287,7 @@ class Mapper extends Service\AbstractService
         $property->setValue($arr);
 
         $resolver->getEntity()->clean($resolver->getProperty());
-        $entity->getEventManager()->trigger('update.post', $resolver->getEntity());
+        $entity->trigger('update.post');
 
         return $this;
     }
@@ -319,7 +319,7 @@ class Mapper extends Service\AbstractService
         $this->prepare($this->getDriver())->pull($entity, $query, $value);
 
         $property = $resolver->getEntity()->property($resolver->getProperty());
-        $entity->getEventManager()->trigger('update.pre', $resolver->getEntity());
+        $entity->trigger('update.pre');
         $arr = $property->getValue();
         foreach ($arr as $index => $val) {
             if ($val === $value) {
@@ -329,7 +329,7 @@ class Mapper extends Service\AbstractService
         }
         $property->setValue(array_merge(array(), $arr));
 
-        $entity->getEventManager()->trigger('update.post', $resolver->getEntity());
+        $entity->trigger('update.post');
         $resolver->getEntity()->clean($resolver->getProperty());
 
         return $this;
