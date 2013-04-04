@@ -235,9 +235,10 @@ class Mapper extends Service\AbstractService
         $resolver = $this->resolve($entity, $query)
                          ->assertType('Contain\Entity\Property\Type\IntegerType');
 
-        $property = $resolver->getEntity()->property($resolver->getProperty());
+        $resolverEntity = $resolver->getEntity();
         $entity->trigger('update.pre');
-        $property->setValue($property->getValue() + $inc);
+        $resolverEntity->property($resolver->getProperty())
+            ->setValue($resolverEntity->property($resolver->getProperty())->getValue() + $inc);
 
         $this->prepare($this->getDriver())->increment($entity, $query, $inc);
         $entity->trigger('update.post');

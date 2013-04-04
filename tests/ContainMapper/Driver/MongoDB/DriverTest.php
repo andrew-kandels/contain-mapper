@@ -20,6 +20,48 @@ class DriverTest extends \PHPUnit_Framework_TestCase
         $this->entity = new SampleChildEntity(array('firstName' => 'test'));
     }
 
+    public function testGetUpdateCriteriaUnsetsProperty()
+    {
+        $entity = new SampleMultiTypeEntity(array('string' => 'test1', 'entity' => $this->entity));
+        $entity->clean();
+        $entity->clear('string');
+        $this->assertEquals(array('$unset' => array('string' => true)), $this->driver->getUpdateCriteria($entity));
+    }
+
+    public function testGetUpdateCriteriaUnsetsSubDocumentProperty()
+    {
+        $entity = new SampleMultiTypeEntity(array('string' => 'test1', 'entity' => $this->entity));
+        $entity->clean()->getEntity()->clear('firstName');
+        $this->assertEquals(array('$unset' => array('entity.firstName' => true)), $this->driver->getUpdateCriteria($entity));
+    }
+
+    public function testGetUpdateCriteriaSetsSubDocumentProperty()
+    {
+        $entity = new SampleMultiTypeEntity(array('string' => 'test1', 'entity' => $this->entity));
+        $entity->clean()->getEntity()->setFirstName('Mrs.');
+        $this->assertEquals(array('$set' => array('entity.firstName' => 'Mrs.')), $this->driver->getUpdateCriteria($entity));
+    }
+
+    public function testGetInsertCriteriaDoesntIncludeSubDocumentProperty()
+    {
+        $entity = new SampleMultiTypeEntity(array('string' => 'test1', 'entity' => $this->entity));
+        $entity->clean()->getEntity()->clear('firstName')->clean('firstName');
+        $criteria = $this->driver->getInsertCriteria($entity);
+        $this->assertInstanceOf('MongoId', $criteria['_id']);
+        $this->assertEquals('test1', $criteria['string']);
+        $this->assertEquals(array('string', '_id'), array_keys($criteria));
+    }
+
+    public function testGetInsertCriteriaDoesIncludeSubDocumentProperty()
+    {
+        $entity = new SampleMultiTypeEntity(array('string' => 'test1', 'entity' => $this->entity));
+        $criteria = $this->driver->getInsertCriteria($entity);
+        $this->assertInstanceOf('MongoId', $criteria['_id']);
+        $this->assertEquals('test1', $criteria['string']);
+        $this->assertEquals(array('firstName' => 'test'), $criteria['entity']);
+        $this->assertEquals(array('string', 'entity', '_id'), array_keys($criteria));
+    }
+
     public function testPersist()
     {
         $this->assertSame($this->driver, $this->driver->persist($this->entity));
@@ -120,5 +162,12 @@ class DriverTest extends \PHPUnit_Framework_TestCase
         $this->driver->pull($entity, 'list', 5);
         $data = $this->driver->findOne(array('string' => 'test1'));
         $this->assertEquals(array(4), $data['list']);
+    }
+
+    public function testGetUpdateCriteriaEmptyIfNothingToDo()
+    {
+        $entity = new SampleMultiTypeEntity(array('string' => 'test1', 'entity' => $this->entity));
+        $entity->clean();
+        $this->assertEquals(array(), $this->driver->getUpdateCriteria($entity));
     }
 }

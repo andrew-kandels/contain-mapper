@@ -124,56 +124,71 @@ class Driver extends AbstractDriver
      */
     public function getUpdateCriteria(EntityInterface $entity, $isSubDocument = false)
     {
-        $dirty = array();
-        $result = array('$set' => array());
+        $result          = array('$set' => array(), '$unset' => array());
         $primaryProperty = null;
-        $primaryValue    = $this->extractId($entity);
 
+        // primary _id property
         if ($primary = array_keys($entity->primary())) {
             list($primaryProperty) = $primary;
         }
 
-        if ($properties = $entity->dirty()) {
-            $dirty = $entity->export($properties);
+        // if nothing is dirty, there's nothing to do, exit early
+        if (!$properties = $entity->dirty()) {
+            return array();
+        }
+
+        // the dirty properties should return their values with the second argument as true...
+        if (!$dirty = $entity->export($properties, true)) {
+            throw new Exception\InvalidArgumentException('$entity is dirty but export() returns no values');
         }
 
         foreach ($dirty as $property => $value) {
+            // never update the primary property (_id), won't work anyway
             if (!$isSubDocument && $primaryProperty == $property) {
                 continue;
             }
 
             $type = $entity->type($property);
 
-            if ($type instanceof Type\DateTimeType) {
-                $value = $this->dateType->parse($value);               
-            }
-
-            // child entity
+            // child entity, use recursion to populate
             if ($type instanceof Type\EntityType) {
                 $child = $entity->property($property)->getValue();
 
                 // if an entity is cleared out and marked as dirty, unset the mongo property
                 if ($this->isDirtyEntityEmpty($child)) {
-                    if (!isset($result['$unset'])) {
-                        $result['$unset'] = array();
-                    }
                     $result['$unset'][$property] = true;
-                } else {
-                    $sub = $this->getUpdateCriteria($child, true);
+                    continue;
+                }
 
-                    if (isset($sub['$set'])) {
-                        foreach ($sub['$set'] as $subProperty => $subValue) {
-                            $result['$set'][$property . '.' . $subProperty] = $subValue;
-                        }
+                // combine the sub-document $sets/$unsets with ours, using dot notation to drill in
+                $sub = $this->getUpdateCriteria($child, true);
+                foreach ($sub as $action => $actions) {
+                    foreach ($actions as $subProperty => $subValue) {
+                        $result[$action][$property . '.' . $subProperty] = $subValue;
                     }
                 }
-            } else {
-                $result['$set'][$property] = $value;
+                continue;
             }
+
+            // is the property being unset?
+            if ($type->export($value) === $type->getUnsetValue()) {
+                $result['$unset'][$property] = true;
+                continue;
+            }
+
+            // return the date object for MongoDate
+            if ($type instanceof Type\DateTimeType) {
+                $value = $this->dateType->parse($value);               
+            }
+
+            $result['$set'][$property] = $value;
         }
 
-        if (empty($result['$set'])) {
-            unset($result['$set']);
+        // mongo will panic with an empty $set or $unset
+        foreach ($result as $action => $actions) {
+            if (empty($result[$action])) {
+                unset($result[$action]);
+            }
         }
 
         return $result;
@@ -192,7 +207,7 @@ class Driver extends AbstractDriver
             return false;
         }
 
-        if (!$props = $entity->export($entity->dirty())) {
+        if (!$props = $entity->export($entity->dirty(), true)) {
             return false;
         }
 
