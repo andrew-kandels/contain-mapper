@@ -276,8 +276,8 @@ class Mapper extends Service\AbstractService
 
         $this->prepare($this->getDriver())->push($entity, $query, $value, $ifNotExists);
 
-        $property = $resolver->getEntity()->property($resolver->getProperty());
         $entity->trigger('update.pre');
+        $property = $resolver->getEntity()->property($resolver->getProperty());
         $arr = $property->getValue() ?: array();
 
         if ($arr instanceof \ContainMapper\Cursor) {
