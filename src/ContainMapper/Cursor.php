@@ -55,6 +55,11 @@ class Cursor extends Service\AbstractService implements Iterator
     protected $entity;
 
     /**
+     * @var array
+     */
+    protected $options = array();
+
+    /**
      * Constructor
      *
      * @param   ContainMapper\Mapper
@@ -114,7 +119,7 @@ class Cursor extends Service\AbstractService implements Iterator
      *
      * @return  void
      */
-    public function rewind() 
+    public function rewind()
     {
         if ($this->cursor instanceof Traversable) {
             $this->cursor->rewind();
@@ -145,6 +150,8 @@ class Cursor extends Service\AbstractService implements Iterator
     {
         if ($this->cursor instanceof Traversable) {
             $entity = $this->cursor->current();
+        } elseif (!empty($this->options['reverse'])) {
+            $entity = $this->cursor[$this->count() - $this->position - 1];
         } else {
             $entity = $this->cursor[$this->position];
         }

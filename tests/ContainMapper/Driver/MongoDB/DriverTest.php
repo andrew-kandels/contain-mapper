@@ -66,8 +66,8 @@ class DriverTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertSame($this->driver, $this->driver->persist($this->entity));
         $data = $this->driver->findOne(array('_id' => 'test'));
-        $this->assertEquals($this->entity->export(), array('firstName' => 'test')); 
-        $this->assertEquals('test', $this->entity->getExtendedProperty('_id')); 
+        $this->assertEquals($this->entity->export(), array('firstName' => 'test'));
+        $this->assertEquals('test', $this->entity->getExtendedProperty('_id'));
     }
 
     public function testPersistAutoId()
@@ -75,6 +75,48 @@ class DriverTest extends \PHPUnit_Framework_TestCase
         $entity = new SampleEntity();
         $this->driver->persist($entity);
         $this->assertTrue((boolean) $entity->getExtendedProperty('_id'));
+    }
+
+    public function testPersistAutoIdIsMongoId()
+    {
+        $entity = new SampleEntity();
+        $this->driver->persist($entity);
+        $this->assertInstanceOf('MongoId', $entity->getExtendedProperty('_id'));
+    }
+
+    public function testPersistSavesSetMongoId()
+    {
+        $entity = new SampleEntity();
+        $id = new \MongoId();
+        $entity->setExtendedProperty('_id', $id);
+        $this->driver->persist($entity);
+        $this->assertInstanceOf('MongoId', $entity->getExtendedProperty('_id'));
+        $this->assertEquals((string) $id, (string) $entity->getExtendedProperty('_id'));
+    }
+
+    public function testPersistSavesExplicitlySetMongoId()
+    {
+        $entity = new SampleEntity();
+        $entity->define('id', 'mongoId', array(
+            'primary' => true,
+        ));
+        $id = new \MongoId();
+        $entity->setId($id);
+        $this->driver->persist($entity);
+        $this->assertInstanceOf('MongoId', $entity->getId());
+        $this->assertEquals((string) $id, (string) $entity->getId());
+        $this->assertEquals((string) $id, (string) $entity->getExtendedProperty('_id'));
+    }
+
+    public function testPersistSavesMongoIdToPrimary()
+    {
+        $entity = new SampleEntity(array('firstName' => 'Mr.'));
+        $entity->define('id', 'mongoId', array(
+            'primary' => true,
+        ));
+        $this->driver->persist($entity);
+        $this->assertInstanceOf('MongoId', $entity->getId());
+        $this->assertEquals((string) $entity->getId(), (string) $entity->getExtendedProperty('_id'));
     }
 
     public function testDelete()
@@ -128,7 +170,7 @@ class DriverTest extends \PHPUnit_Framework_TestCase
             array('$set' => array(
                 'string' => 'test1',
                 'entity.firstName' => 'test',
-            )), 
+            )),
             $this->driver->getUpdateCriteria($entity1)
         );
         $entity1->clean();

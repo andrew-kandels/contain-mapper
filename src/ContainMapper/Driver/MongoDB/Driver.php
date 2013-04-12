@@ -178,7 +178,7 @@ class Driver extends AbstractDriver
 
             // return the date object for MongoDate
             if ($type instanceof Type\DateTimeType) {
-                $value = $this->dateType->parse($value);               
+                $value = $this->dateType->parse($value);
             }
 
             $result['$set'][$property] = $value;
@@ -446,9 +446,9 @@ class Driver extends AbstractDriver
     }
 
     /**
-     * Post-hydration callback. Attempts to set the internal _id property 
-     * Mongo uses to identity the primary unique id of the entity, either 
-     * from the Mongo driver if this is an internal invokation or by 
+     * Post-hydration callback. Attempts to set the internal _id property
+     * Mongo uses to identity the primary unique id of the entity, either
+     * from the Mongo driver if this is an internal invokation or by
      * extrapolating it from the primary scalar id.
      *
      * @param   Contain\Entity\EntityInterface
@@ -507,6 +507,7 @@ class Driver extends AbstractDriver
 
         if ($value instanceof MongoId) {
             $entity->setExtendedProperty('_id', $value);
+            $entity->fromArray($primary);
             return $value;
         }
 
