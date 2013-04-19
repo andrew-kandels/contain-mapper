@@ -319,16 +319,15 @@ class Mapper extends Service\AbstractService
 
         $this->prepare($this->getDriver())->pull($entity, $query, $value);
 
-        $property = $resolver->getEntity()->property($resolver->getProperty());
         $entity->trigger('update.pre');
-        $arr = $property->getValue();
+        $arr = $resolver->getEntity()->property($resolver->getProperty())->getValue();
         foreach ($arr as $index => $val) {
             if ($val === $value) {
                 unset($arr[$index]);
                 break;
             }
         }
-        $property->setValue(array_merge(array(), $arr));
+        $resolver->getEntity()->property($resolver->getProperty())->setValue(array_merge(array(), $arr));
 
         $entity->trigger('update.post');
         $resolver->getEntity()->clean($resolver->getProperty());
