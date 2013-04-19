@@ -49,12 +49,24 @@ class Mapper extends Service\AbstractService
      *
      * @param   string                                  Entity Classname this mapper hydrates
      * @param   ContainMapper\Driver\DriverInterface
-     * @return  $this
+     * @return  void
      */
     public function __construct($entity, Driver\AbstractDriver $driver = null)
     {
         $this->entity = $entity;
         $this->driver = $driver;
+    }
+
+    /**
+     * Sets the entity class this mapper hydrates.
+     *
+     * @param   string                                  Entity Classname this mapper hydrates
+     * @return  $this
+     */
+    public function setEntity($entity)
+    {
+        $this->entity = $entity;
+        return $this;
     }
 
     /**
