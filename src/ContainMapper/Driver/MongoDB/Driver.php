@@ -236,7 +236,7 @@ class Driver extends AbstractDriver
             $this->getConnection()->getCollection()->insert(
                 $data = $this->getInsertCriteria($entity),
                 $this->getOptions(array(
-                    'safe'    => false,
+                    'w' => 1,
                     'fsync'   => false,
                     'timeout' => 60000, // 1 minute
                 ))
@@ -254,7 +254,7 @@ class Driver extends AbstractDriver
                 $this->getOptions(array(
                     'upsert' => false,
                     'multiple' => false,
-                    'safe' => false,
+                    'w' => 1,
                     'fsync' => false,
                     'timeout' => 60000, // 1 minute
                 ))
@@ -293,7 +293,7 @@ class Driver extends AbstractDriver
 
         $options = $this->getOptions(array(
             'justOne' => true,
-            'safe'    => false,
+            'w'    => 1,
             'fsync'   => false,
             'timeout' => 60000, // 1 minute
         ));
@@ -374,7 +374,7 @@ class Driver extends AbstractDriver
             $this->getOptions(array(
                 'upsert' => false,
                 'multiple' => false,
-                'safe' => false,
+                'w' => 1,
                 'fsync' => false,
                 'timeout' => 60000, // 1 minute
             ))
@@ -407,7 +407,7 @@ class Driver extends AbstractDriver
             $this->getOptions(array(
                 'upsert' => false,
                 'multiple' => false,
-                'safe' => false,
+                'w' => 1,
                 'fsync' => false,
                 'timeout' => 60000, // 1 minute
             ))
@@ -436,7 +436,7 @@ class Driver extends AbstractDriver
             $this->getOptions(array(
                 'upsert' => false,
                 'multiple' => false,
-                'safe' => false,
+                'w' => 1,
                 'fsync' => false,
                 'timeout' => 60000, // 1 minute
             ))
