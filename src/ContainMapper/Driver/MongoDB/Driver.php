@@ -335,9 +335,12 @@ class Driver extends AbstractDriver
     public function find($criteria = null)
     {
         $cursor = $this->getConnection()->getCollection()->find(
-            $criteria ?: array(),
-            $this->getProperties()
+            $criteria ?: array()
         );
+
+        if ($this->timeout !== null) {
+            $cursor->timeout($this->timeout);
+        }
 
         if ($this->sort !== null) {
             $cursor->sort($this->sort);

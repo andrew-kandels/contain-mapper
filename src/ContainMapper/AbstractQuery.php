@@ -54,6 +54,11 @@ abstract class AbstractQuery
     /**
      * @var array
      */
+    protected $timeout;
+
+    /**
+     * @var array
+     */
     protected $options = array();
 
     /**
@@ -119,6 +124,40 @@ abstract class AbstractQuery
     public function getSkip()
     {
         return $this->skip;
+    }
+
+    /**
+     * Sets the query timeout value.
+     *
+     * @param   integer
+     * @return  $this
+     */
+    public function timeout($seconds)
+    {
+        $this->timeout = (int) $seconds;
+        return $this;
+    }
+
+    /**
+     * Sets the query timeout value.
+     *
+     * @param   integer
+     * @return  $this
+     */
+    public function setTimeout($seconds)
+    {
+        $this->timeout($seconds);
+        return $this;
+    }
+
+    /**
+     * Gets the query timeout value.
+     *
+     * @return  integer
+     */
+    public function getTimeout()
+    {
+        return $this->timeout;
     }
 
     /**
@@ -296,11 +335,15 @@ abstract class AbstractQuery
             $this->setSort($mp['sort']);
         }
 
+        if (isset($mp['timeout'])) {
+            $this->setTimeout($mp['timeout']);
+        }
+
         return $this;
     }
 
     /**
-     * Exports all internal options. Primarily used for debugging and for 
+     * Exports all internal options. Primarily used for debugging and for
      * injecting one query objects parameters into another.
      *
      * @return  array
@@ -313,6 +356,7 @@ abstract class AbstractQuery
             'limit' => $this->getLimit(),
             'skip' => $this->getSkip(),
             'options' => $this->getOptions(),
+            'timeout' => $this->getTimeout(),
         );
     }
 }
