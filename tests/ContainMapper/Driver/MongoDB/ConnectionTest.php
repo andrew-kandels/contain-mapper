@@ -4,7 +4,7 @@ namespace ContainMapperTest\Driver\MongoDB;
 use ContainMapper\Driver\MongoDB;
 use Mongo;
 
-class Test extends \PHPUnit_Framework_TestCase
+class ConnectionTest extends \PHPUnit_Framework_TestCase
 {
 
     public function setUp()
