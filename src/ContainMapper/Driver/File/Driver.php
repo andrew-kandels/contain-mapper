@@ -139,16 +139,4 @@ class Driver extends ContainMapper\Driver\AbstractDriver
 
         return $this;
     }
-
-    /**
-     * Post-hydration callback.
-     *
-     * @param   Contain\Entity\EntityInterface
-     * @param   Values we returned
-     * @return  $this
-     */
-    public function hydrate(EntityInterface $entity, $values)
-    {
-        return $this;
-    }
 }
