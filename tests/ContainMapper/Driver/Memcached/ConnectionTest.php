@@ -6,6 +6,16 @@ use Memcached as PHPMemcached;
 
 class ConnectionTest extends \PHPUnit_Framework_TestCase
 {
+
+    public function setUp()
+    {
+        if (!extension_loaded('memcached')) {
+            $this->markTestSkipped(
+                'The Memcached extension is not available.'
+            );
+        }
+    }
+
     public function testConstruct()
     {
         $memcached = new PHPMemcached();
