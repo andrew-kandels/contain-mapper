@@ -67,6 +67,18 @@ abstract class AbstractDriver
     }
 
     /**
+     * Post-hydration callback.
+     *
+     * @param   Contain\Entity\EntityInterface
+     * @param   Values we returned
+     * @return  $this
+     */
+    public function hydrate(EntityInterface $entity, $values)
+    {
+        return $this;
+    }
+
+    /**
      * Returns true if the data entity has been persisted to the data store
      * this driver is responsible for.
      *
