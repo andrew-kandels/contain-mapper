@@ -181,7 +181,7 @@ class Driver extends AbstractDriver
      */
     public function count(array $criteria)
     {
-        return $this->tableGateway->count($criteria);
+        return $this->tableGateway->count($this->criteria($criteria));
     }
 
     /**
@@ -209,10 +209,8 @@ class Driver extends AbstractDriver
      */
     public function findOne($criteria = null)
     {
-        $select = new Select();
-        $select->where($criteria);
+        $select = $this->criteria($criteria);
         $select->limit(1);
-
 
         $result = $this->tableGateway->select($select);
 
@@ -230,15 +228,40 @@ class Driver extends AbstractDriver
      */
     public function find($criteria = null)
     {
-        $select = new Select();
-        $select->where($criteria);
-
-        $result = $this->tableGateway->select($select);
+        $result = $this->tableGateway->select($this->criteria($criteria));
 
         if (!$result) {
             return false;
         }
 
         return $result;
+    }
+
+    /**
+     * Handle Criteria
+     *
+     * @param array Criteria
+     * @return Select
+     */
+    protected function criteria(array $criteria)
+    {
+        $select = new Select();
+
+        $isSpecial = false;
+        foreach (array('limit', 'offset', 'order', 'where', 'having', 'join', 'columns') as $key) {
+            if (array_key_exists($key, $criteria)) {
+                $isSpecial = true;
+                break;
+            }
+        }
+
+        if (!$isSpecial) {
+            return $select->where($criteria);
+        }
+
+        foreach ($criteria as $k => $v) {
+            $select->$k($v);
+        }
+        return $select;
     }
 }
