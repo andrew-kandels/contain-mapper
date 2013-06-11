@@ -196,7 +196,7 @@ class Driver extends AbstractDriver
      */
     public function count(array $criteria)
     {
-        $resultSet = $this->tableGateway->select($this->criteria($criteria));
+        $resultSet = $this->tableGateway->selectWith($this->criteria($criteria));
         return $resultSet->count();
     }
 
@@ -228,7 +228,7 @@ class Driver extends AbstractDriver
         $select = $this->criteria($criteria);
         $select->limit(1);
 
-        $result = $this->tableGateway->select($select);
+        $result = $this->tableGateway->selectWith($select);
 
         if (!$result) {
             return false;
