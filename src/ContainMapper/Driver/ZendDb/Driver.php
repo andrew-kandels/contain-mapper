@@ -43,6 +43,21 @@ class Driver extends AbstractDriver
      */
     protected $tableGateway;
 
+
+    /**
+     * @var array
+     */
+    protected $selectCriteria = array(
+        'columns',
+        'from',
+        'having',
+        'join',
+        'limit',
+        'offset',
+        'order',
+        'where',
+    );
+
     /**
      * Constructor
      *
@@ -229,7 +244,8 @@ class Driver extends AbstractDriver
      */
     public function find($criteria = null)
     {
-        $result = $this->tableGateway->select($this->criteria($criteria));
+        $select = $this->criteria($criteria);
+        $result = $this->tableGateway->selectWith($select);
 
         if (!$result) {
             return false;
@@ -246,19 +262,19 @@ class Driver extends AbstractDriver
      */
     protected function criteria(array $criteria)
     {
-        $select = new Select();
+        $select = $this->tableGateway->getSql()->select();
+        if (empty($criteria)) {
+            return $select;
+        }
 
         $isSpecial = false;
-        foreach (array('limit', 'offset', 'order', 'where', 'having', 'join', 'columns') as $key) {
-            if (array_key_exists($key, $criteria)) {
+        foreach ($criteria as $k => $v) {
+            if (in_array($k, $this->selectCriteria)) {
                 $isSpecial = true;
                 break;
             }
         }
-
-        if (!$isSpecial) {
-            return $select->where($criteria);
-        }
+        $criteria = $isSpecial ? $criteria : array('where' => $criteria);
 
         foreach ($criteria as $k => $v) {
             $select->$k($v);
