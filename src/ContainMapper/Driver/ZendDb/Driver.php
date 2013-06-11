@@ -181,7 +181,8 @@ class Driver extends AbstractDriver
      */
     public function count(array $criteria)
     {
-        return $this->tableGateway->count($this->criteria($criteria));
+        $resultSet = $this->tableGateway->select($this->criteria($criteria));
+        return $resultSet->count();
     }
 
     /**
