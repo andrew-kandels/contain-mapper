@@ -43,6 +43,21 @@ class Driver extends AbstractDriver
      */
     protected $tableGateway;
 
+
+    /**
+     * @var array
+     */
+    protected $selectCriteria = array(
+        'columns',
+        'from',
+        'having',
+        'join',
+        'limit',
+        'offset',
+        'order',
+        'where',
+    );
+
     /**
      * Constructor
      *
@@ -181,7 +196,8 @@ class Driver extends AbstractDriver
      */
     public function count(array $criteria)
     {
-        return $this->tableGateway->count($criteria);
+        $resultSet = $this->tableGateway->selectWith($this->criteria($criteria));
+        return $resultSet->count();
     }
 
     /**
@@ -209,12 +225,10 @@ class Driver extends AbstractDriver
      */
     public function findOne($criteria = null)
     {
-        $select = new Select();
-        $select->where($criteria);
+        $select = $this->criteria($criteria);
         $select->limit(1);
 
-
-        $result = $this->tableGateway->select($select);
+        $result = $this->tableGateway->selectWith($select);
 
         if (!$result) {
             return false;
@@ -230,15 +244,41 @@ class Driver extends AbstractDriver
      */
     public function find($criteria = null)
     {
-        $select = new Select();
-        $select->where($criteria);
-
-        $result = $this->tableGateway->select($select);
+        $select = $this->criteria($criteria);
+        $result = $this->tableGateway->selectWith($select);
 
         if (!$result) {
             return false;
         }
 
         return $result;
+    }
+
+    /**
+     * Handle Criteria
+     *
+     * @param array Criteria
+     * @return Select
+     */
+    protected function criteria(array $criteria)
+    {
+        $select = $this->tableGateway->getSql()->select();
+        if (empty($criteria)) {
+            return $select;
+        }
+
+        $isSpecial = false;
+        foreach ($criteria as $k => $v) {
+            if (in_array($k, $this->selectCriteria)) {
+                $isSpecial = true;
+                break;
+            }
+        }
+        $criteria = $isSpecial ? $criteria : array('where' => $criteria);
+
+        foreach ($criteria as $k => $v) {
+            $select->$k($v);
+        }
+        return $select;
     }
 }
