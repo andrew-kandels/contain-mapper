@@ -281,4 +281,47 @@ class Driver extends AbstractDriver
         }
         return $select;
     }
+
+    /**
+     * Post Hydration Callback
+     *
+     * @param EntityInterface $entity
+     * @param array $values
+     * @return self
+     */
+    public function hydrate(EntityInterface $entity, $values)
+    {
+        $properties = $entity->properties(true);
+        foreach ($properties as $name) {
+            $property = $entity->property($name);
+            if ($property->getType() instanceof \Contain\Entity\Property\Type\EntityType) {
+                $method = 'findOne';
+            } else if ($property->getType() instanceof \Contain\Entity\Property\Type\ListEntityType) {
+                $method = 'find';
+            } else {
+                continue;
+            }
+            $options = $property->getOptions();
+            foreach (array('table', 'criteria', 'className') as $key) {
+                if (!array_key_exists($key, $options)) {
+                    continue 2;
+                }
+            }
+
+            // create the mapper
+            $mapper = new \ContainMapper\Mapper(
+                $options['className'],
+                new self($this->getConnection(), $options['table'])
+            );
+
+            // fill in dynamic properties
+            foreach($options['criteria'] as $k => $v) {
+                if (!is_null($entity->get($v))) {
+                    $options['criteria'][$k] = $entity->get($v);
+                }
+            }
+            $results = $mapper->$method($options['criteria']);
+            $entity->set($name, $results);
+        }
+    }
 }
