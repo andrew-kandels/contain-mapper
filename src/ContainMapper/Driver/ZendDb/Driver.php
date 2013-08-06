@@ -269,7 +269,7 @@ class Driver extends AbstractDriver
 
         $isSpecial = false;
         foreach ($criteria as $k => $v) {
-            if (in_array($k, $this->selectCriteria)) {
+            if (in_array($k, $this->selectCriteria, true)) {
                 $isSpecial = true;
                 break;
             }
