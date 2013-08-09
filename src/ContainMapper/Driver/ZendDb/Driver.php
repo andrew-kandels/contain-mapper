@@ -178,10 +178,10 @@ class Driver extends AbstractDriver
             if (!$primary) {
                 return false;
             }
-            $this->tableGateway->update(
-                $data = $this->getUpdateCriteria($entity),
-                $primary
-            );
+            $data = $this->getUpdateCriteria($entity);
+            if ($data) {
+                $this->tableGateway->update($data, $primary);
+            }
         }
 
         return $this;
