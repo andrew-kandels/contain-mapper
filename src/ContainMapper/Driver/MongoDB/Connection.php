@@ -23,6 +23,7 @@ use ContainMapper\Driver\ConnectionInterface;
 use ContainMapper\Exception;
 use Mongo;
 use MongoClient;
+use RuntimeException;
 
 /**
  * MongoDB Connection
@@ -35,12 +36,12 @@ use MongoClient;
 class Connection implements ConnectionInterface
 {
     /**
-     * @var Mongo
+     * @var Mongo|MongoClient
      */
     protected $connection;
 
     /**
-     * @var MongoCollection
+     * @var \MongoCollection
      */
     protected $collection;
 
@@ -62,16 +63,19 @@ class Connection implements ConnectionInterface
     /**
      * Constructor
      *
-     * @param   Mongo                       Mongo Database Connection Instance
-     * @param   string                      Name of the MongoDB database
-     * @param   string                      Name of the MongoDB collection
+     * @param Mongo  $connection     Mongo Database Connection Instance
+     * @param string $databaseName   Name of the MongoDB database
+     * @param string $collectionName Name of the MongoDB collection
+     *
      * @return self
+     *
+     * @throws RuntimeException
      */
     public function __construct($connection, $databaseName, $collectionName)
     {
-        $this->databaseName = $databaseName;
+        $this->databaseName   = (string) $databaseName;
         $this->collectionName = $collectionName;
-        $this->connection = $connection;
+        $this->connection     = $connection;
 
         if (!$this->connection instanceof Mongo &&
             !$this->connection instanceof MongoClient) {
@@ -84,7 +88,7 @@ class Connection implements ConnectionInterface
     /**
      * Return the Mongo database.
      *
-     * @return  MongoDB
+     * @return \MongoDB
      */
     public function getDatabase()
     {
@@ -101,7 +105,7 @@ class Connection implements ConnectionInterface
     /**
      * Return the MongoDB collection.
      *
-     * @return  MongoCollection
+     * @return \MongoCollection
      */
     public function getCollection()
     {
@@ -118,11 +122,10 @@ class Connection implements ConnectionInterface
     /**
      * Builds a connection to MongoDB and returns the Mongo object.
      *
-     * @return  Mongo
+     * @return Mongo|MongoClient
      */
     public function getConnection()
     {
         return $this->connection;
     }
-
 }
