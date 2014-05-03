@@ -32,7 +32,7 @@ interface ConnectionInterface
     /**
      * Gets the raw connection for the driver.
      *
-     * @return  mixed
+     * @return mixed
      */
     public function getConnection();
 }
