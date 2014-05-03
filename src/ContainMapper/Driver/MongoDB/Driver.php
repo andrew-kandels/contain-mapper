@@ -19,12 +19,11 @@
 
 namespace ContainMapper\Driver\MongoDB;
 
-use ContainMapper\Driver\AbstractDriver;
-use ContainMapper\Exception;
 use Contain\Entity\EntityInterface;
 use Contain\Entity\Property\Type;
+use ContainMapper\Driver\AbstractDriver;
+use ContainMapper\Exception;
 use MongoId;
-use ContainMapper\Resolver;
 
 /**
  * MongoDB Driver

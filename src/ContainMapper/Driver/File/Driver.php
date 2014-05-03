@@ -19,9 +19,9 @@
 
 namespace ContainMapper\Driver\File;
 
-use ContainMapper;
-use ContainMapper\Exception;
 use Contain\Entity\EntityInterface;
+use ContainMapper\Exception;
+use ContainMapper;
 
 /**
  * File-based Data Source

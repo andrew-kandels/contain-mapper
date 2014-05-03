@@ -19,8 +19,8 @@
 
 namespace ContainMapper\Driver\File;
 
-use ContainMapper\Exception;
 use ContainMapper\Driver\ConnectionInterface;
+use ContainMapper\Exception;
 
 /**
  * File-based Connection

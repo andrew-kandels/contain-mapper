@@ -19,8 +19,8 @@
 
 namespace ContainMapper\Driver\Memcached;
 
-use ContainMapper\Exception;
 use ContainMapper\Driver\ConnectionInterface;
+use ContainMapper\Exception;
 use Memcached;
 
 /**

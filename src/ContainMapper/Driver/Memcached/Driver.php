@@ -19,9 +19,9 @@
 
 namespace ContainMapper\Driver\Memcached;
 
-use ContainMapper;
-use ContainMapper\Exception;
 use Contain\Entity\EntityInterface;
+use ContainMapper\Exception;
+use ContainMapper;
 
 /**
  * Memcached Data Source Driver

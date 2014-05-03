@@ -20,7 +20,6 @@
 namespace ContainMapper\Service;
 
 use ContainMapper;
-use Zend\EventManager\Event;
 use Zend\EventManager\EventManager;
 
 /**

@@ -19,12 +19,10 @@
 
 namespace ContainMapper\Driver\MongoDB;
 
-use Traversable;
+use ContainMapper\Driver\ConnectionInterface;
 use ContainMapper\Exception;
 use Mongo;
 use MongoClient;
-use ContainMapper\Driver\ConnectionInterface;
-use MongoId;
 
 /**
  * MongoDB Connection

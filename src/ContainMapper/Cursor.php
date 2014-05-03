@@ -19,7 +19,6 @@
 
 namespace ContainMapper;
 
-use Contain\Entity\EntityInterface;
 use Iterator;
 use Traversable;
 

@@ -19,10 +19,10 @@
 
 namespace ContainMapper\Driver;
 
-use ContainMapper;
-use ContainMapper\Exception;
 use Contain\Entity\EntityInterface;
 use Contain\Entity\Property\Type;
+use ContainMapper\Exception;
+use ContainMapper;
 
 /**
  * MongoDB Driver

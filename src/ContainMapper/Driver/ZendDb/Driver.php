@@ -21,10 +21,9 @@ namespace ContainMapper\Driver\ZendDb;
 
 use Contain\Entity\EntityInterface;
 use Contain\Entity\Property\Type;
-use ContainMapper\Driver\ConnectionInterface;
 use ContainMapper\Driver\AbstractDriver;
+use ContainMapper\Driver\ConnectionInterface;
 use ContainMapper\Exception;
-use ContainMapper\Resolver;
 use Zend\Db\Sql\Select;
 use Zend\Db\TableGateway\TableGateway;
 
