@@ -65,7 +65,7 @@ class Connection implements ConnectionInterface
      * @param   Mongo                       Mongo Database Connection Instance
      * @param   string                      Name of the MongoDB database
      * @param   string                      Name of the MongoDB collection
-     * @return  $this
+     * @return self
      */
     public function __construct($connection, $databaseName, $collectionName)
     {

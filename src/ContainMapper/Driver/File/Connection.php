@@ -41,7 +41,7 @@ class Connection implements ConnectionInterface
      * Constructor
      *
      * @param   array|Traversable           Configuration
-     * @return  $this
+     * @return self
      */
     public function __construct($path)
     {

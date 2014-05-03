@@ -79,7 +79,7 @@ class Driver extends AbstractDriver
      * @param   Contain\Entity\EntityInterface  Contain Data Entity
      * @param   string                          Path to the property
      * @param   integer                         Amount to increment by (+|-)
-     * @return  $this
+     * @return self
      */
     public function increment(EntityInterface $entity, $column, $inc)
     {

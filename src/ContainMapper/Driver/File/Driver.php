@@ -37,7 +37,7 @@ class Driver extends ContainMapper\Driver\AbstractDriver
      * Persists an entity in MongoDB.
      *
      * @param   EntityInterface                 Entity to persist
-     * @return  $this
+     * @return self
      */
     public function persist(EntityInterface $entity)
     {
@@ -127,7 +127,7 @@ class Driver extends ContainMapper\Driver\AbstractDriver
      * Deletes an entity.
      *
      * @param   Contain\Entity\EntityInterface
-     * @return  $this
+     * @return self
      */
     public function delete(EntityInterface $entity)
     {

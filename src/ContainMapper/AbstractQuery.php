@@ -68,10 +68,10 @@ abstract class AbstractQuery
 
     /**
      * Limits the results of any find/search operation from the mapper
-     * to a maximum count.
+     * to a maximum count./
      *
      * @param   integer             Number of Hydrated Entities
-     * @return  $this
+     * @return self
      */
     public function limit($num)
     {
@@ -83,7 +83,7 @@ abstract class AbstractQuery
      * Adds a limit (if not set).
      *
      * @param   integer             Number of Hydrated Entities
-     * @return  $this
+     * @return self
      */
     public function setDefaultLimit($num)
     {
@@ -108,7 +108,7 @@ abstract class AbstractQuery
      * Skips a number of entities in any find/search operation.
      *
      * @param    integer             Number of entities to skip.
-     * @return   $this
+     * @return self
      */
     public function skip($num)
     {
@@ -130,7 +130,7 @@ abstract class AbstractQuery
      * Sets the query timeout value.
      *
      * @param   integer
-     * @return  $this
+     * @return self
      */
     public function timeout($seconds)
     {
@@ -142,7 +142,7 @@ abstract class AbstractQuery
      * Sets the query timeout value.
      *
      * @param   integer
-     * @return  $this
+     * @return self
      */
     public function setTimeout($seconds)
     {
@@ -165,7 +165,7 @@ abstract class AbstractQuery
      * find/search query.
      *
      * @param   array                Sort criteria
-     * @return  $this
+     * @return self
      */
     public function sort(array $criteria)
     {
@@ -177,7 +177,7 @@ abstract class AbstractQuery
      * Adds a sort (if not set).
      *
      * @param   array                Sort criteria
-     * @return  $this
+     * @return self
      */
     public function setDefaultSort(array $criteria)
     {
@@ -205,7 +205,7 @@ abstract class AbstractQuery
      *
      * @param   string              Option Name
      * @param   mixed               Option Value
-     * @return  $this
+     * @return self
      */
     public function setOption($name, $value)
     {
@@ -219,7 +219,7 @@ abstract class AbstractQuery
      *
      * @param   string              Option Name
      * @param   mixed               Option Value
-     * @return  $this
+     * @return self
      */
     public function setOptions($options)
     {
@@ -260,7 +260,7 @@ abstract class AbstractQuery
     /**
      * Resets internal query options and settings.
      *
-     * @return  $this
+     * @return self
      */
     public function clear()
     {
@@ -275,7 +275,7 @@ abstract class AbstractQuery
      * entity hydration.
      *
      * @param   Traversable|array|string                Properties to Select
-     * @return  $this
+     * @return self
      */
     public function properties($properties = array())
     {
@@ -311,7 +311,7 @@ abstract class AbstractQuery
      * Imports all internal options in a format created by export().
      *
      * @param   array                           Exported values
-     * @return  $this
+     * @return self
      */
     public function fromArray(array $mp)
     {

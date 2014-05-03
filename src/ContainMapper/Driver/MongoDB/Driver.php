@@ -225,7 +225,7 @@ class Driver extends AbstractDriver
      * Persists an entity in MongoDB.
      *
      * @param   EntityInterface                 Entity to persist
-     * @return  $this
+     * @return self
      */
     public function persist(EntityInterface $entity)
     {
@@ -281,7 +281,7 @@ class Driver extends AbstractDriver
      * Deletes an entity.
      *
      * @param   Contain\Entity\EntityInterface
-     * @return  $this
+     * @return self
      */
     public function delete(EntityInterface $entity)
     {
@@ -362,7 +362,7 @@ class Driver extends AbstractDriver
      * @param   Contain\Entity\EntityInterface  Entity to persist
      * @param   string                          Query to resolve path to numeric property
      * @param   integer                         Amount to increment by
-     * @return  $this
+     * @return self
      */
     public function increment(EntityInterface $entity, $query, $inc)
     {
@@ -393,7 +393,7 @@ class Driver extends AbstractDriver
      * @param   string                          Query to resolve which should point to a ListType
      * @param   mixed|array                     Value to append
      * @param   boolean                         Only add if it doesn't exist
-     * @return  $this
+     * @return self
      */
     public function push(EntityInterface $entity, $query, $value, $ifNotExists = false)
     {
@@ -424,7 +424,7 @@ class Driver extends AbstractDriver
      * @param   Contain\Entity\EntityInterface  Entity to persist
      * @param   string                          Query to resolve which should point to a ListType
      * @param   mixed|array                     Value to remove
-     * @return  $this
+     * @return self
      */
     public function pull(EntityInterface $entity, $query, $value)
     {
@@ -455,7 +455,7 @@ class Driver extends AbstractDriver
      *
      * @param   Contain\Entity\EntityInterface
      * @param   Values we returned
-     * @return  $this
+     * @return self
      */
     public function hydrate(EntityInterface $entity, $values)
     {

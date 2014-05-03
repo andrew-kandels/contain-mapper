@@ -42,7 +42,7 @@ class Connection implements ConnectionInterface
      * Constructor
      *
      * @param   Memcached               Memcached connection
-     * @return  $this
+     * @return self
      */
     public function __construct(Memcached $connection)
     {

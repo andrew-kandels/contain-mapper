@@ -45,7 +45,7 @@ abstract class AbstractDriver
      * Constructor
      *
      * @param   ContainMapper\ConnectionInterface
-     * @return  $this
+     * @return self
      */
     public function __construct(ConnectionInterface $connection)
     {
@@ -71,7 +71,7 @@ abstract class AbstractDriver
      *
      * @param   Contain\Entity\EntityInterface
      * @param   Values we returned
-     * @return  $this
+     * @return self
      */
     public function hydrate(EntityInterface $entity, $values)
     {
@@ -98,7 +98,7 @@ abstract class AbstractDriver
      * @param   Contain\Entity\EntityInterface  Contain Data Entity
      * @param   string                          Path to the property
      * @param   integer                         Amount to increment by (+|-)
-     * @return  $this
+     * @return self
      */
     public function increment(EntityInterface $entity, $query, $inc)
     {
@@ -114,7 +114,7 @@ abstract class AbstractDriver
      * @param   string                          Path to the property
      * @param   mixed|array|Traversable         Value(s) to push
      * @param   boolean                         Only add if it doesn't exist (if supported)
-     * @return  $this
+     * @return self
      */
     public function push(EntityInterface $entity, $query, $value, $ifNotExists = false)
     {
