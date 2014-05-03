@@ -20,6 +20,7 @@
 namespace ContainMapper;
 
 use InvalidArgumentException;
+use Traversable;
 
 /**
  * Fetch/Query Unit of Work
@@ -164,7 +165,8 @@ abstract class AbstractQuery
      * Configures how the results should be sorted in the next
      * find/search query.
      *
-     * @param   array                Sort criteria
+     * @param array $criteria Sort criteria
+     *
      * @return self
      */
     public function sort(array $criteria)
@@ -176,7 +178,8 @@ abstract class AbstractQuery
     /**
      * Adds a sort (if not set).
      *
-     * @param   array                Sort criteria
+     * @param array $criteria Sort criteria
+     *
      * @return self
      */
     public function setDefaultSort(array $criteria)
@@ -192,7 +195,7 @@ abstract class AbstractQuery
      * Returns how the results should be sorted in the next
      * find/search query.
      *
-     * @return  array
+     * @return array
      */
     public function getSort()
     {
@@ -203,8 +206,9 @@ abstract class AbstractQuery
      * Sets a mapper level option that will be passed to the next
      * mapper method invokation.
      *
-     * @param   string              Option Name
-     * @param   mixed               Option Value
+     * @param string $name  Option Name
+     * @param mixed  $value Option Value
+     *
      * @return self
      */
     public function setOption($name, $value)
@@ -217,8 +221,8 @@ abstract class AbstractQuery
      * Sets mapper level options that will be passed to the next
      * mapper method invokation.
      *
-     * @param   string              Option Name
-     * @param   mixed               Option Value
+     * @param array|Traversable $options Option Name
+     *
      * @return self
      */
     public function setOptions($options)
