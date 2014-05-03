@@ -1,7 +1,6 @@
 <?php
 namespace ContainMapperTest\Service;
 
-use ContainMapperTest\Service\SampleService;
 use ContainMapperTest\SampleQuery;
 
 class AbstractServiceTest extends \PHPUnit_Framework_TestCase
