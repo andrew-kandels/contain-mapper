@@ -36,6 +36,8 @@ use MongoId;
  * @package     contain
  * @copyright   Copyright (c) 2012 Andrew P. Kandels (http://andrewkandels.com)
  * @license     http://www.opensource.org/licenses/bsd-license.php BSD License
+ *
+ * @method Connection getConnection()
  */
 class Driver extends AbstractDriver
 {

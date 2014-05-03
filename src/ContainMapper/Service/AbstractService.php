@@ -46,7 +46,7 @@ abstract class AbstractService extends AbstractQuery
      * @param AbstractQuery $query
      * @param bool          $clearProperties Clears the query properties after prepping
      *
-     * @return AbstractQuery
+     * @return self
      */
     public function prepare(AbstractQuery $query, $clearProperties = true)
     {

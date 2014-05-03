@@ -215,11 +215,13 @@ class Driver extends AbstractDriver
         $select = $this->criteria($criteria);
         $select->limit(1);
 
+        /* @var $result \Iterator */
         $result = $this->tableGateway->selectWith($select);
 
         if (!$result) {
             return false;
         }
+
         return $result->current();
     }
 
