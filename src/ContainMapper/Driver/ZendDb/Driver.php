@@ -21,9 +21,12 @@ namespace ContainMapper\Driver\ZendDb;
 
 use Contain\Entity\EntityInterface;
 use Contain\Entity\Property\Type;
+use Contain\Entity\Property\Type\EntityType;
+use Contain\Entity\Property\Type\ListEntityType;
 use ContainMapper\Driver\AbstractDriver;
 use ContainMapper\Driver\ConnectionInterface;
 use ContainMapper\Exception;
+use ContainMapper\Mapper;
 use Zend\Db\Sql\Select;
 use Zend\Db\TableGateway\TableGateway;
 
@@ -38,7 +41,7 @@ use Zend\Db\TableGateway\TableGateway;
 class Driver extends AbstractDriver
 {
     /**
-     * @var Zend\Db\TableGateway\TableGateway
+     * @var TableGateway
      */
     protected $tableGateway;
 
@@ -60,26 +63,18 @@ class Driver extends AbstractDriver
     /**
      * Constructor
      *
-     * @param   ContainMapper\ConnectionInterface $connection
-     * @param   string                            $table
-     * @return  Driver
+     * @param ConnectionInterface $connection
+     * @param string $table
      */
     public function __construct(ConnectionInterface $connection, $table)
     {
-        $this->tableGateway = new TableGateway($table, $connection->getConnection());
+        $this->tableGateway = new TableGateway((string) $table, $connection->getConnection());
 
         parent::__construct($connection);
     }
 
     /**
-     * May be invoked by the mapper if the driver supports an atomic, or
-     * more efficient incrementor method as opposed to the typical
-     * persist().
-     *
-     * @param   Contain\Entity\EntityInterface  Contain Data Entity
-     * @param   string                          Path to the property
-     * @param   integer                         Amount to increment by (+|-)
-     * @return self
+     * {@inheritDoc}
      */
     public function increment(EntityInterface $entity, $column, $inc)
     {
@@ -91,8 +86,9 @@ class Driver extends AbstractDriver
      * Rewrites the export() output of an entity into an array
      * for TableGateway.
      *
-     * @param   Contain\Entity\EntityInterface
-     * @return  array
+     * @param EntityInterface $entity
+     *
+     * @return array
      */
     public function getInsertCriteria(EntityInterface $entity)
     {
@@ -104,7 +100,7 @@ class Driver extends AbstractDriver
             $type  = $entity->type($name);
             $value = $data[$name];
 
-            if ($type instanceof Type\EntityType) {
+            if ($type instanceof EntityType) {
                 continue;
             } elseif ($type instanceof Type\ListType) {
                 continue;
@@ -120,9 +116,9 @@ class Driver extends AbstractDriver
      * Rewrites the dirty() output from an entity into something
      * TableGateway can use in an update statement.
      *
-     * @param   EntityInterface     Reference entity
+     * @param EntityInterface $entity Reference entity
      *
-     * @return  array
+     * @return array
      */
     public function getUpdateCriteria(EntityInterface $entity)
     {
@@ -141,7 +137,7 @@ class Driver extends AbstractDriver
 
             $type = $entity->type($property);
 
-            if ($type instanceof Type\EntityType) {
+            if ($type instanceof EntityType) {
                 continue;
             } elseif ($type instanceof Type\ListType) {
                 continue;
@@ -154,10 +150,7 @@ class Driver extends AbstractDriver
     }
 
     /**
-     * Persists an entity in Zend Db Table Gateway.
-     *
-     * @param   EntityInterface                 Entity to persist
-     * @return  Driver
+     * {@inheritDoc}
      */
     public function persist(EntityInterface $entity)
     {
@@ -190,8 +183,9 @@ class Driver extends AbstractDriver
      * Runs a count query to determine the number of rows
      * that match the given criteria.
      *
-     * @param   array               Criteria
-     * @return  integer
+     * @param array $criteria
+     *
+     * @return int
      */
     public function count(array $criteria)
     {
@@ -200,10 +194,7 @@ class Driver extends AbstractDriver
     }
 
     /**
-     * Deletes an entity.
-     *
-     * @param   Contain\Entity\EntityInterface
-     * @return  Driver
+     * {@inheritDoc}
      */
     public function delete(EntityInterface $entity)
     {
@@ -217,10 +208,7 @@ class Driver extends AbstractDriver
     }
 
     /**
-     * Finds a single entity and returns its data.
-     *
-     * @param   array               Criteria
-     * @return  array
+     * {@inheritDoc}
      */
     public function findOne($criteria = null)
     {
@@ -236,10 +224,7 @@ class Driver extends AbstractDriver
     }
 
     /**
-     * Finds multiple entities and returns their data.
-     *
-     * @param   array               Criteria
-     * @return  Traversable
+     * {@inheritDoc}
      */
     public function find($criteria = null)
     {
@@ -256,7 +241,8 @@ class Driver extends AbstractDriver
     /**
      * Handle Criteria
      *
-     * @param array Criteria
+     * @param array $criteria
+     *
      * @return Select
      */
     protected function criteria(array $criteria)
@@ -282,20 +268,16 @@ class Driver extends AbstractDriver
     }
 
     /**
-     * Post Hydration Callback
-     *
-     * @param EntityInterface $entity
-     * @param array $values
-     * @return self
+     * {@inheritDoc}
      */
     public function hydrate(EntityInterface $entity, $values)
     {
         $properties = $entity->properties(true);
         foreach ($properties as $name) {
             $property = $entity->property($name);
-            if ($property->getType() instanceof \Contain\Entity\Property\Type\EntityType) {
+            if ($property->getType() instanceof EntityType) {
                 $method = 'findOne';
-            } else if ($property->getType() instanceof \Contain\Entity\Property\Type\ListEntityType) {
+            } else if ($property->getType() instanceof ListEntityType) {
                 $method = 'find';
             } else {
                 continue;
@@ -308,7 +290,7 @@ class Driver extends AbstractDriver
             }
 
             // create the mapper
-            $mapper = new \ContainMapper\Mapper(
+            $mapper = new Mapper(
                 $options['className'],
                 new self($this->getConnection(), $options['table'])
             );
