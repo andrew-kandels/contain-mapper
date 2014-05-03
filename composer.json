@@ -28,7 +28,11 @@
     },
     "autoload": {
         "psr-0": {
-            "ContainMapper": "src/",
+            "ContainMapper": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-0": {
             "ContainMapperTest": "tests/"
         }
     }
