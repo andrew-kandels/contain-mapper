@@ -100,7 +100,7 @@ interface DriverInterface
      *
      * @param mixed $criteria Search criteria
      *
-     * @return EntityInterface[]
+     * @return EntityInterface[]|\Traversable
      */
     public function find($criteria = null);
 
