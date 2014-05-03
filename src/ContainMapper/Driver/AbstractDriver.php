@@ -135,7 +135,7 @@ abstract class AbstractDriver
         }
 
         if (is_array($primary)) {
-            foreach ($primary as $key => $value) {
+            foreach ($primary as $value) {
                 if (!is_scalar($value)) {
                     throw new Exception\InvalidArgumentException('$entity has a non-scalar primary()');
                 }

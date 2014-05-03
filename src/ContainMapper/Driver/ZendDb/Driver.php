@@ -121,10 +121,10 @@ class Driver extends AbstractDriver
      * TableGateway can use in an update statement.
      *
      * @param   EntityInterface     Reference entity
-     * @param   boolean                                 Is a sub-document (recursive)
+     *
      * @return  array
      */
-    public function getUpdateCriteria(EntityInterface $entity, $isSubDocument = false)
+    public function getUpdateCriteria(EntityInterface $entity)
     {
         $dirty = array();
         $return = array();
