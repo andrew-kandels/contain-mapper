@@ -6,7 +6,7 @@
         "zf2","entity","hydrator","contain"
     ],
     "homepage": "http://contain-project.org",
-    "license": "BSD",
+    "license": "BSD-2-Clause",
     "authors": [
         {
             "name": "Andrew Kandels",
