@@ -73,10 +73,11 @@ class Driver extends AbstractDriver
         $properties      = $entity->properties();
         $data            = $entity->export();
         $return          = array();
+        $primaryProperty = null;
+        $primaryValue    = null;
 
         if (!$isSubDocument) {
-            $primaryProperty = null;
-            $primaryValue    = $this->extractId($entity);
+            $primaryValue = $this->extractId($entity);
 
             if ($primary = array_keys($entity->primary())) {
                 list($primaryProperty) = $primary;

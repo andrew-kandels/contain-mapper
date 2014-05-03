@@ -68,7 +68,8 @@ class Resolver
     /**
      * Constructor
      *
-     * @param   string                      Query
+     * @param string $query Query
+     *
      * @return self
      */
     public function __construct($query)
@@ -156,8 +157,9 @@ class Resolver
             return $this->scan($this->value, implode('.', $parts));
         }
 
-        $this->throwException($entity, "Part '$part', property '{$this->property}' cannot be "
-            . "traversed."
+        $this->throwException(
+            $entity,
+            sprintf("Part '%s', property '{$this->property}' cannot be traversed.", reset($parts))
         );
     }
 

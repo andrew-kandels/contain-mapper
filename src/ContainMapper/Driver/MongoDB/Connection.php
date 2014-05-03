@@ -56,7 +56,7 @@ class Connection implements ConnectionInterface
     protected $databaseName;
 
     /**
-     * @var MongoDB
+     * @var \MongoDB
      */
     protected $database;
 

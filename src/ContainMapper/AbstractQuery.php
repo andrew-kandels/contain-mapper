@@ -245,8 +245,9 @@ abstract class AbstractQuery
      * for a mapper method invokation and then clears the stack for the
      * next.
      *
-     * @param   array           Options
-     * @return  array
+     * @param array $defaults Options
+     *
+     * @return array
      */
     public function getOptions(array $defaults = array())
     {
@@ -314,7 +315,8 @@ abstract class AbstractQuery
     /**
      * Imports all internal options in a format created by export().
      *
-     * @param   array                           Exported values
+     * @param array $mp Exported values
+     *
      * @return self
      */
     public function fromArray(array $mp)

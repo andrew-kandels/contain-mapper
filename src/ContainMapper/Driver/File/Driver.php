@@ -41,7 +41,7 @@ class Driver extends ContainMapper\Driver\AbstractDriver
         $file = $this->getPathToEntity($entity);
 
         if (!file_put_contents($file, json_encode($entity->export()))) {
-            throw new Exception\RuntimeException("Unable to open '$fileName' for writing.");
+            throw new Exception\RuntimeException("Unable to open '$file' for writing.");
         }
 
         return $this;
