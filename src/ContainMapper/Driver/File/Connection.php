@@ -33,29 +33,30 @@ use ContainMapper\Exception;
 class Connection implements ConnectionInterface
 {
     /**
-     * @var array
+     * @var string
      */
     protected $path;
 
     /**
      * Constructor
      *
-     * @param   array|Traversable           Configuration
-     * @return self
+     * @param string $path Configuration
+     *
+     * @throws Exception\InvalidArgumentException
      */
     public function __construct($path)
     {
-        $this->path = $path;
-
-        if (!is_dir($this->path)) {
+        if (!is_dir($path )) {
             throw new Exception\InvalidArgumentException('$path is not a directory');
         }
+
+        $this->path = $path;
     }
 
     /**
      * Return the directory as the raw connection for clients.
      *
-     * @return  string
+     * @return string
      */
     public function getConnection()
     {
