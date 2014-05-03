@@ -21,6 +21,7 @@ namespace ContainMapper\Service;
 
 use ContainMapper;
 use Zend\EventManager\EventManager;
+use Zend\EventManager\EventManagerInterface;
 
 /**
  * Abstract Service
@@ -33,7 +34,7 @@ use Zend\EventManager\EventManager;
 abstract class AbstractService extends ContainMapper\AbstractQuery
 {
     /**
-     * @var Zend\EventManager\EventManager
+     * @var \Zend\EventManager\EventManagerInterface
      */
     protected $eventManager;
 
@@ -42,9 +43,10 @@ abstract class AbstractService extends ContainMapper\AbstractQuery
      * options, sort, limiting and other query specific
      * attributes.
      *
-     * @param   Contain\Mapper\Driver       Mapper
-     * @param   boolean                     Clears the query properties after prepping
-     * @return  Contain\Mapper\Driver
+     * @param ContainMapper\AbstractQuery $query
+     * @param bool                        $clearProperties Clears the query properties after prepping
+     *
+     * @return ContainMapper\AbstractQuery
      */
     public function prepare(ContainMapper\AbstractQuery $query, $clearProperties = true)
     {
@@ -75,7 +77,7 @@ abstract class AbstractService extends ContainMapper\AbstractQuery
      * Retrieves an instance of the Zend Framework event manager in order to
      * register or trigger events.
      *
-     * @return  Zend\EventManager\EventManager
+     * @return EventManagerInterface
      */
     public function getEventManager()
     {
@@ -90,10 +92,11 @@ abstract class AbstractService extends ContainMapper\AbstractQuery
      * Retrieves an instance of the Zend Framework event manager in order to
      * register or trigger events.
      *
-     * @param   Zend\EventManager\EventManager
-     * @return  $this
+     * @param EventManagerInterface|null $eventManager
+     *
+     * @return self
      */
-    public function setEventManager(EventManager $eventManager = null)
+    public function setEventManager(EventManagerInterface $eventManager = null)
     {
         $this->eventManager = $eventManager;
         return $this;
