@@ -2,7 +2,6 @@
 namespace ContainMapperTest\Driver\ZendDb;
 
 use ContainTest\Entity\SampleChildEntity;
-use ContainTest\Entity\SampleEntity;
 use ContainTest\Entity\SampleMultiTypeEntity;
 
 class DriverTest extends \PHPUnit_Framework_TestCase

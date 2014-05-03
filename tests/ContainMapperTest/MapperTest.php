@@ -1,8 +1,8 @@
 <?php
 namespace ContainMapperTest;
 
-use Mongo;
 use ContainTest\Entity\SampleMultiTypeEntity;
+use Mongo;
 
 class MapperTest extends \PHPUnit_Framework_TestCase
 {

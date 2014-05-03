@@ -19,9 +19,9 @@
 
 namespace ContainMapper\Service;
 
-use ContainMapper;
-use Zend\EventManager\Event;
+use ContainMapper\AbstractQuery;
 use Zend\EventManager\EventManager;
+use Zend\EventManager\EventManagerInterface;
 
 /**
  * Abstract Service
@@ -31,23 +31,24 @@ use Zend\EventManager\EventManager;
  * @copyright   Copyright (c) 2012 Andrew P. Kandels (http://andrewkandels.com)
  * @license     http://www.opensource.org/licenses/bsd-license.php BSD License
  */
-abstract class AbstractService extends ContainMapper\AbstractQuery
+abstract class AbstractService extends AbstractQuery
 {
     /**
-     * @var Zend\EventManager\EventManager
+     * @var \Zend\EventManager\EventManagerInterface
      */
     protected $eventManager;
 
     /**
-     * Prepares a mapper for a method's invokation. Passes along
+     * Prepares a mapper for a method's invocation. Passes along
      * options, sort, limiting and other query specific
      * attributes.
      *
-     * @param   Contain\Mapper\Driver       Mapper
-     * @param   boolean                     Clears the query properties after prepping
-     * @return  Contain\Mapper\Driver
+     * @param AbstractQuery $query
+     * @param bool          $clearProperties Clears the query properties after prepping
+     *
+     * @return self
      */
-    public function prepare(ContainMapper\AbstractQuery $query, $clearProperties = true)
+    public function prepare(AbstractQuery $query, $clearProperties = true)
     {
         if ($this->limit !== null) {
             $query->limit($this->limit);
@@ -76,7 +77,7 @@ abstract class AbstractService extends ContainMapper\AbstractQuery
      * Retrieves an instance of the Zend Framework event manager in order to
      * register or trigger events.
      *
-     * @return  Zend\EventManager\EventManager
+     * @return EventManagerInterface
      */
     public function getEventManager()
     {
@@ -91,10 +92,11 @@ abstract class AbstractService extends ContainMapper\AbstractQuery
      * Retrieves an instance of the Zend Framework event manager in order to
      * register or trigger events.
      *
-     * @param   Zend\EventManager\EventManager
-     * @return  $this
+     * @param EventManagerInterface|null $eventManager
+     *
+     * @return self
      */
-    public function setEventManager(EventManager $eventManager = null)
+    public function setEventManager(EventManagerInterface $eventManager = null)
     {
         $this->eventManager = $eventManager;
         return $this;

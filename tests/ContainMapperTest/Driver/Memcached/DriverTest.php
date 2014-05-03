@@ -2,9 +2,9 @@
 namespace ContainMapperTest\Driver\Memcached;
 
 use ContainMapper\Driver\Memcached;
-use Memcached as PHPMemcached;
 use ContainTest\Entity\SampleChildEntity;
 use ContainTest\Entity\SampleEntity;
+use Memcached as PHPMemcached;
 
 class DriverTest extends \PHPUnit_Framework_TestCase
 {

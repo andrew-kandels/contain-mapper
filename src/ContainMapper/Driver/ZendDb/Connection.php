@@ -33,15 +33,14 @@ use Zend\Db\Adapter\AdapterInterface;
 class Connection implements ConnectionInterface
 {
     /**
-     * @var Zend\Db\Adapter
+     * @var AdapterInterface
      */
     protected $connection;
 
     /**
      * Constructor
      *
-     * @param   Zend\Db\Adapter\AdapterInterface Zend Db Adapter
-     * @return  Connection
+     * @param AdapterInterface $connection Zend Db Adapter
      */
     public function __construct(AdapterInterface $connection)
     {
@@ -51,7 +50,7 @@ class Connection implements ConnectionInterface
     /**
      * Returns the Zend Db Adapter
      *
-     * @return  Zend\Db\Adapter\AdapterInterface
+     * @return AdapterInterface
      */
     public function getConnection()
     {

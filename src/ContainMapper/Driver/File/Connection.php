@@ -19,8 +19,8 @@
 
 namespace ContainMapper\Driver\File;
 
-use ContainMapper\Exception;
 use ContainMapper\Driver\ConnectionInterface;
+use ContainMapper\Exception;
 
 /**
  * File-based Connection
@@ -33,29 +33,30 @@ use ContainMapper\Driver\ConnectionInterface;
 class Connection implements ConnectionInterface
 {
     /**
-     * @var array
+     * @var string
      */
     protected $path;
 
     /**
      * Constructor
      *
-     * @param   array|Traversable           Configuration
-     * @return  $this
+     * @param string $path Configuration
+     *
+     * @throws Exception\InvalidArgumentException
      */
     public function __construct($path)
     {
-        $this->path = $path;
-
-        if (!is_dir($this->path)) {
+        if (!is_dir($path )) {
             throw new Exception\InvalidArgumentException('$path is not a directory');
         }
+
+        $this->path = $path;
     }
 
     /**
      * Return the directory as the raw connection for clients.
      *
-     * @return  string
+     * @return string
      */
     public function getConnection()
     {

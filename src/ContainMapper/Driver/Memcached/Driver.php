@@ -19,9 +19,9 @@
 
 namespace ContainMapper\Driver\Memcached;
 
-use ContainMapper;
-use ContainMapper\Exception;
 use Contain\Entity\EntityInterface;
+use ContainMapper\Exception;
+use ContainMapper;
 
 /**
  * Memcached Data Source Driver
@@ -34,10 +34,7 @@ use Contain\Entity\EntityInterface;
 class Driver extends ContainMapper\Driver\AbstractDriver
 {
     /**
-     * Persists an entity in MongoDB.
-     *
-     * @param   EntityInterface                 Entity to persist
-     * @return  $this
+     * {@inheritDoc}
      */
     public function persist(EntityInterface $entity)
     {
@@ -63,10 +60,7 @@ class Driver extends ContainMapper\Driver\AbstractDriver
     }
 
     /**
-     * Deletes an entity.
-     *
-     * @param   Contain\Entity\EntityInterface
-     * @return  $this
+     * {@inheritDoc}
      */
     public function delete(EntityInterface $entity)
     {
@@ -86,10 +80,7 @@ class Driver extends ContainMapper\Driver\AbstractDriver
     }
 
     /**
-     * Finds a single entity and returns its data.
-     *
-     * @param   array               Criteria
-     * @return  array|false
+     * {@inheritDoc}
      */
     public function findOne($criteria = null)
     {
@@ -99,16 +90,13 @@ class Driver extends ContainMapper\Driver\AbstractDriver
     }
 
     /**
-     * Finds multiple entities and returns their data.
-     *
-     * @param   array               Criteria
-     * @return  array[]
+     * {@inheritDoc}
      */
     public function find($criteria = null)
     {
         $results = $this->getConnection()
             ->getConnection()
-            ->getMulti($criteria, $tokens);
+            ->getMulti($criteria);
 
         if ($this->skip !== null) {
             $results = array_slice($results, $this->skip);

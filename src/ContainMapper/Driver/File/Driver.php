@@ -19,9 +19,9 @@
 
 namespace ContainMapper\Driver\File;
 
-use ContainMapper;
-use ContainMapper\Exception;
 use Contain\Entity\EntityInterface;
+use ContainMapper\Exception;
+use ContainMapper;
 
 /**
  * File-based Data Source
@@ -34,17 +34,14 @@ use Contain\Entity\EntityInterface;
 class Driver extends ContainMapper\Driver\AbstractDriver
 {
     /**
-     * Persists an entity in MongoDB.
-     *
-     * @param   EntityInterface                 Entity to persist
-     * @return  $this
+     * {@inheritDoc}
      */
     public function persist(EntityInterface $entity)
     {
         $file = $this->getPathToEntity($entity);
 
         if (!file_put_contents($file, json_encode($entity->export()))) {
-            throw new Exception\RuntimeException("Unable to open '$fileName' for writing.");
+            throw new Exception\RuntimeException("Unable to open '$file' for writing.");
         }
 
         return $this;
@@ -53,9 +50,11 @@ class Driver extends ContainMapper\Driver\AbstractDriver
     /**
      * Builds the path to an entity in the file source.
      *
-     * @param   Contain\Entity\EntityInterface|false
-     * @return  string
-     * @throw   ContainMapper\Exception\InvalidArgumentException
+     * @param EntityInterface $entity
+     *
+     * @return string
+     *
+     * @throws Exception\InvalidArgumentException
      */
     protected function getPathToEntity(EntityInterface $entity)
     {
@@ -72,8 +71,9 @@ class Driver extends ContainMapper\Driver\AbstractDriver
     /**
      * Finds an entity by primary key.
      *
-     * @param   string                  Primary key value
-     * @return  Contain\Entity\EntityInterface|false
+     * @param string $slug Primary key value
+     *
+     * @return EntityInterface|false
      */
     public function findOne($slug = null)
     {
@@ -90,16 +90,15 @@ class Driver extends ContainMapper\Driver\AbstractDriver
     }
 
     /**
-     * Finds all entities.
-     *
-     * @return  Contain\Entity\EntityInterface[]
+     * {@inheritDoc}
      */
-    public function find($ignore = null)
+    public function find($criteria = null)
     {
         $iterator = new \DirectoryIterator($this->connection->getConnection());
         $results  = array();
         $cnt      = 0;
 
+        /* @var $item \SplFileInfo */
         foreach ($iterator as $item) {
             $cnt++;
 
@@ -124,10 +123,7 @@ class Driver extends ContainMapper\Driver\AbstractDriver
     }
 
     /**
-     * Deletes an entity.
-     *
-     * @param   Contain\Entity\EntityInterface
-     * @return  $this
+     * {@inheritDoc}
      */
     public function delete(EntityInterface $entity)
     {

@@ -1,10 +1,10 @@
 <?php
 namespace ContainMapperTest\Driver\MongoDB;
 
-use Mongo;
 use ContainTest\Entity\SampleChildEntity;
 use ContainTest\Entity\SampleEntity;
 use ContainTest\Entity\SampleMultiTypeEntity;
+use Mongo;
 
 class DriverTest extends \PHPUnit_Framework_TestCase
 {

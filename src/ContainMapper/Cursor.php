@@ -19,7 +19,6 @@
 
 namespace ContainMapper;
 
-use Contain\Entity\EntityInterface;
 use Iterator;
 use Traversable;
 
@@ -34,13 +33,14 @@ use Traversable;
 class Cursor extends Service\AbstractService implements Iterator
 {
     /**
-     * @var ContainMapper\Mapper
+     * @var Mapper
      */
     protected $mapper;
 
     /**
      * Internal cursor to iterate
-     * @var array|Traversable
+     *
+     * @var array|Iterator|Traversable
      */
     protected $cursor;
 
@@ -50,7 +50,7 @@ class Cursor extends Service\AbstractService implements Iterator
     protected $position;
 
     /**
-     * @var Contain\Entity\EntityInterface
+     * @var \Contain\Entity\EntityInterface
      */
     protected $entity;
 
@@ -62,14 +62,13 @@ class Cursor extends Service\AbstractService implements Iterator
     /**
      * Constructor
      *
-     * @param   ContainMapper\Mapper
-     * @param   array|Traversable
-     * @return  $this
+     * @param Mapper          $mapper
+     * @param array|\Iterator $cursor
      */
     public function __construct(Mapper $mapper, $cursor)
     {
-        if (!is_array($cursor) && !$cursor instanceof Traversable) {
-            throw new Exception\InvalidArgumentException('Cursor expects $cursor argument to be traversable');
+        if (! ($cursor instanceof Iterator || $cursor instanceof Traversable || is_array($cursor))) {
+            throw new Exception\InvalidArgumentException('Cursor expects $cursor argument to be iterable/traversable');
         }
 
         $this->mapper = $mapper;
@@ -79,12 +78,13 @@ class Cursor extends Service\AbstractService implements Iterator
     /**
      * Exports the cursor as a plain array.
      *
-     * @return  array
+     * @return array
      */
     public function export()
     {
         $return = array();
 
+        /* @var $item \Contain\Entity\EntityInterface */
         foreach ($this as $item) {
             $return[] = $item->export();
         }
@@ -95,7 +95,7 @@ class Cursor extends Service\AbstractService implements Iterator
     /**
      * Exports the cursor as a hydrated array.
      *
-     * @return  Contain\Entity\EntityInterface[]
+     * @return \Contain\Entity\EntityInterface[]
      */
     public function toArray()
     {
@@ -121,9 +121,10 @@ class Cursor extends Service\AbstractService implements Iterator
      */
     public function rewind()
     {
-        if ($this->cursor instanceof Traversable) {
+        if ($this->cursor instanceof Iterator) {
             $this->cursor->rewind();
         }
+
         $this->position = 0;
     }
 
@@ -148,7 +149,7 @@ class Cursor extends Service\AbstractService implements Iterator
      */
     public function current()
     {
-        if ($this->cursor instanceof Traversable) {
+        if ($this->cursor instanceof Iterator) {
             $entity = $this->cursor->current();
         } elseif (!empty($this->options['reverse'])) {
             $entity = $this->cursor[$this->count() - $this->position - 1];
@@ -177,7 +178,7 @@ class Cursor extends Service\AbstractService implements Iterator
      */
     public function key()
     {
-        if ($this->cursor instanceof Traversable) {
+        if ($this->cursor instanceof Iterator) {
             return $this->cursor->key();
         }
 
@@ -191,10 +192,13 @@ class Cursor extends Service\AbstractService implements Iterator
      */
     public function next()
     {
-        if ($this->cursor instanceof Traversable) {
-            return $this->cursor->next();
+        if ($this->cursor instanceof Iterator) {
+            $this->cursor->next();
+
+            return;
         }
-        ++$this->position;
+
+        $this->position += 1;
     }
 
     /**
@@ -204,7 +208,7 @@ class Cursor extends Service\AbstractService implements Iterator
      */
     public function valid()
     {
-        if ($this->cursor instanceof Traversable) {
+        if ($this->cursor instanceof Iterator) {
             return $this->cursor->valid();
         }
 

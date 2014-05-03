@@ -34,9 +34,10 @@ interface DriverInterface
     /**
      * Post-hydration callback.
      *
-     * @param   Contain\Entity\EntityInterface
-     * @param   Values we returned
-     * @return  $this
+     * @param EntityInterface $entity
+     * @param mixed           $values Values we returned
+     *
+     * @return self
      */
     public function hydrate(EntityInterface $entity, $values);
 
@@ -44,8 +45,9 @@ interface DriverInterface
      * Returns true if the data entity has been persisted to the data store
      * this driver is responsible for.
      *
-     * @param   EntityInterface                 Entity to persist
-     * @return  boolean
+     * @param EntityInterface $entity
+     *
+     * @return bool
      */
     public function isPersisted(EntityInterface $entity);
 
@@ -54,10 +56,11 @@ interface DriverInterface
      * more efficient incrementor method as opposed to the typical
      * persist().
      *
-     * @param   Contain\Entity\EntityInterface  Contain Data Entity
-     * @param   string                          Path to the property
-     * @param   integer                         Amount to increment by (+|-)
-     * @return  $this
+     * @param EntityInterface $entity
+     * @param string          $query  Path to the property
+     * @param int             $inc    Amount to increment by (+|-)
+     *
+     * @return self
      */
     public function increment(EntityInterface $entity, $query, $inc);
 
@@ -65,43 +68,48 @@ interface DriverInterface
      * May be invoked by the mapper if the driver supports an atomic, or
      * more efficient way of appending items to the end of an array property.
      *
-     * @param   Contain\Entity\EntityInterface  Contain Data Entity
-     * @param   string                          Path to the property
-     * @param   mixed|array|Traversable         Value(s) to push
-     * @param   boolean                         Only add if it doesn't exist (if supported)
-     * @return  $this
+     * @param EntityInterface          $entity      Contain Data Entity
+     * @param string                   $query       Path to the property
+     * @param mixed|array|\Traversable $value       Value(s) to push
+     * @param bool                     $ifNotExists Only add if it doesn't exist (if supported)
+     *
+     * @return self
      */
     public function push(EntityInterface $entity, $query, $value, $ifNotExists = false);
 
     /**
      * Persists an entity into the data source the driver is responsible for.
      *
-     * @param   EntityInterface                 Entity to persist
-     * @return  $this
+     * @param EntityInterface $entity Entity to persist
+     *
+     * @return self
      */
     public function persist(EntityInterface $entity);
 
     /**
      * Finds a single entity from some criteria.
      *
-     * @param   mixed                   Search criteria
-     * @return  Contain\Entity\EntityInterface|false
+     * @param mixed $criteria Search criteria
+     *
+     * @return EntityInterface|false
      */
     public function findOne($criteria = null);
 
     /**
      * Finds multiple entities from some criteria.
      *
-     * @param   mixed                   Search criteria
-     * @return  Contain\Entity\EntityInterface[]
+     * @param mixed $criteria Search criteria
+     *
+     * @return EntityInterface[]|\Traversable
      */
     public function find($criteria = null);
 
     /**
      * Deletes an entity.
      *
-     * @param   Contain\Entity\EntityInterface
-     * @return  $this
+     * @param EntityInterface $entity
+     *
+     * @return self
      */
     public function delete(EntityInterface $entity);
 }

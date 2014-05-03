@@ -19,10 +19,11 @@
 
 namespace ContainMapper;
 
-use InvalidArgumentException;
 use Contain\Entity\EntityInterface;
 use Contain\Entity\Property\Type\EntityType;
 use Contain\Entity\Property\Type\ListType;
+use Contain\Entity\Property\Type\TypeInterface;
+use InvalidArgumentException;
 
 /**
  * Represents a query for a property in a hierarchy and its solution.
@@ -40,7 +41,7 @@ class Resolver
     protected $query;
 
     /**
-     * @var Contain\Entity\EntityInterface;
+     * @var EntityInterface;
      */
     protected $entity;
 
@@ -50,7 +51,7 @@ class Resolver
     protected $value;
 
     /**
-     * @var Contain\Entity\Property\Type\TypeInterface
+     * @var TypeInterface
      */
     protected $type;
 
@@ -60,15 +61,16 @@ class Resolver
     protected $property;
 
     /**
-     * @var Contain\Entity\Property\Resolver[]
+     * @var \Contain\Entity\Property\Resolver[]
      */
     protected $steps = array();
 
     /**
      * Constructor
      *
-     * @param   string                      Query
-     * @return  $this
+     * @param string $query Query
+     *
+     * @return self
      */
     public function __construct($query)
     {
@@ -84,10 +86,12 @@ class Resolver
      * constructor by parsing the dot notation and scanning properties
      * and sub-properties.
      *
-     * @param   Contain\Entity\EntityInterface              Entity
-     * @param   string                                      Recursive query
-     * @return  $this
-     * @throws  InvalidArgumentException
+     * @param EntityInterface $entity
+     * @param string          $query  Recursive query
+     *
+     * @return self
+     *
+     * @throws InvalidArgumentException
      */
     public function scan(EntityInterface $entity, $query = null)
     {
@@ -101,7 +105,7 @@ class Resolver
         $this->value    = $this->lookupPropertyValue($this->entity, $this->property);
         $this->type     = $this->entity->type($this->property);
 
-        if ($this->value instanceof \ContainMapper\Cursor) {
+        if ($this->value instanceof Cursor) {
             $this->value = $this->value->toArray();
         }
 
@@ -114,7 +118,7 @@ class Resolver
             $subType = $this->type->getType();
 
             if (!preg_match('/^[0-9]+$/', $part)) {
-                $this->throwException("Property '{$this->property}' of Contain\Entity\Property\Type\ListType "
+                $this->throwException("Property '{$this->property}' of Contain\\Entity\\Property\\Type\\ListType "
                     . "can only be traversed numerically."
                 );
             }
@@ -153,17 +157,19 @@ class Resolver
             return $this->scan($this->value, implode('.', $parts));
         }
 
-        $this->throwException($entity, "Part '$part', property '{$this->property}' cannot be "
-            . "traversed."
+        $this->throwException(
+            $entity,
+            sprintf("Part '%s', property '{$this->property}' cannot be traversed.", reset($parts))
         );
     }
 
     /**
      * Verifies a property exists and returns the value.
      *
-     * @param   Contain\Entity\EntityInterface              Entity
-     * @param   string                                      Property
-     * @return  mixed
+     * @param EntityInterface $entity
+     * @param string          $property
+     *
+     * @return mixed
      */
     protected function lookupPropertyValue(EntityInterface $entity, $property)
     {
@@ -177,13 +183,14 @@ class Resolver
     /**
      * Throws an exception with a consistent message for debugging.
      *
-     * @param   string                                      Message
-     * @param   string                                      Exception class
-     * @return  $this
+     * @param string|null $message
+     * @param string      $exceptionClass
+     *
+     * @throws \Exception
      */
-    protected function throwException($message = null, $e = '\InvalidArgumentException')
+    protected function throwException($message = null, $exceptionClass = 'InvalidArgumentException')
     {
-        throw new $e(sprintf('Resolver query \'%s\' failed on %s.%s',
+        throw new $exceptionClass(sprintf('Resolver query \'%s\' failed on %s.%s',
             $this->query,
             $this->entity ? get_class($this->entity) : '(no entity)',
             $message ? ' ' . $message : 'No details'
@@ -194,9 +201,11 @@ class Resolver
      * Ensures the matched item from scan() is an instance of a given type
      * or throws an exception.
      *
-     * @param   string                      Class
-     * @throws  InvalidArgumentException
-     * @return  $this
+     * @param string $type
+     *
+     * @return self
+     *
+     * @throws InvalidArgumentException
      */
     public function assertType($type)
     {
@@ -214,7 +223,7 @@ class Resolver
     /**
      * Returns the entity owner of the matched property.
      *
-     * @return  Contain\Entity\EntityInterface
+     * @return EntityInterface
      */
     public function getEntity()
     {
@@ -224,7 +233,7 @@ class Resolver
     /**
      * Returns the type of the matched property.
      *
-     * @return  Contain\Entity\Property\Type\TypeInterface
+     * @return \Contain\Entity\Property\Type\TypeInterface
      */
     public function getType()
     {
@@ -235,7 +244,7 @@ class Resolver
      * Returns the current value of the matched property of its
      * parent entity.
      *
-     * @return  mixed
+     * @return mixed
      */
     public function getValue()
     {
@@ -245,7 +254,7 @@ class Resolver
     /**
      * Returns the matched property.
      *
-     * @return  string
+     * @return string
      */
     public function getProperty()
     {
@@ -256,7 +265,7 @@ class Resolver
      * Return the steps of Resolver instances in order of how they found
      * the property.
      *
-     * @return  Contain\Property\Resolver[]
+     * @return \Contain\Entity\Property\Resolver[]
      */
     public function getSteps()
     {
@@ -266,7 +275,7 @@ class Resolver
     /**
      * Clears the steps which record how a property was found.
      *
-     * @return  $this
+     * @return self
      */
     public function clearSteps()
     {

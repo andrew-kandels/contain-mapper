@@ -19,12 +19,15 @@
 
 namespace ContainMapper\Driver\MongoDB;
 
+use Contain\Entity\EntityInterface;
+use Contain\Entity\Property\Type\DateTimeType;
+use Contain\Entity\Property\Type\EntityType;
+use Contain\Entity\Property\Type\ListType;
+use Contain\Entity\Property\Type\MongoDateType;
+use Contain\Entity\Property\Type\MongoIdType;
 use ContainMapper\Driver\AbstractDriver;
 use ContainMapper\Exception;
-use Contain\Entity\EntityInterface;
-use Contain\Entity\Property\Type;
 use MongoId;
-use ContainMapper\Resolver;
 
 /**
  * MongoDB Driver
@@ -33,16 +36,18 @@ use ContainMapper\Resolver;
  * @package     contain
  * @copyright   Copyright (c) 2012 Andrew P. Kandels (http://andrewkandels.com)
  * @license     http://www.opensource.org/licenses/bsd-license.php BSD License
+ *
+ * @method Connection getConnection()
  */
 class Driver extends AbstractDriver
 {
     /**
-     * @var Contain\Entity\Property\Type\MongoDate
+     * @var MongoDateType
      */
     protected $dateType;
 
     /**
-     * @var Contain\Entity\Property\Type\MongoId
+     * @var MongoIdType
      */
     protected $idType;
 
@@ -53,26 +58,28 @@ class Driver extends AbstractDriver
      */
     public function init()
     {
-        $this->dateType = new Type\MongoDateType();
-        $this->idType = new Type\MongoIdType();
+        $this->dateType = new MongoDateType();
+        $this->idType   = new MongoIdType();
     }
 
     /**
      * Rewrites the export() output of an entity into a Mongo array.
      *
-     * @param   Contain\Entity\EntityInterface
-     * @param   boolean                                 Is a sub-document (recursive)
-     * @return  array
+     * @param EntityInterface $entity
+     * @param boolean         $isSubDocument Is a sub-document (recursive)
+     *
+     * @return array
      */
     public function getInsertCriteria(EntityInterface $entity, $isSubDocument = false)
     {
         $properties      = $entity->properties();
         $data            = $entity->export();
         $return          = array();
+        $primaryProperty = null;
+        $primaryValue    = null;
 
         if (!$isSubDocument) {
-            $primaryProperty = null;
-            $primaryValue    = $this->extractId($entity);
+            $primaryValue = $this->extractId($entity);
 
             if ($primary = array_keys($entity->primary())) {
                 list($primaryProperty) = $primary;
@@ -83,16 +90,16 @@ class Driver extends AbstractDriver
             $type  = $entity->type($name);
             $value = $data[$name];
 
-            if ($type instanceof Type\DateTimeType || $type instanceof Type\MongoDateType) {
+            if ($type instanceof DateTimeType || $type instanceof MongoDateType) {
                 $return[$name] = $this->dateType->parse($value);
-            } elseif ($type instanceof Type\MongoIdType) {
+            } elseif ($type instanceof MongoIdType) {
                 $return[$name] = $this->idType->export($value);
-            } elseif ($type instanceof Type\EntityType) {
+            } elseif ($type instanceof EntityType) {
                 $value = $this->getInsertCriteria($entity->get($name), true);
                 if ($value) {
                     $return[$name] = $value;
                 }
-            } elseif ($type instanceof Type\ListType) {
+            } elseif ($type instanceof ListType) {
                 if ($value) {
                     $return[$name] = $value;
                 }
@@ -118,9 +125,10 @@ class Driver extends AbstractDriver
      * Rewrites the dirty() output from an entity into something
      * MongoDb can use in an update statement.
      *
-     * @param   EntityInterface     Reference entity
-     * @param   boolean                                 Is a sub-document (recursive)
-     * @return  array
+     * @param EntityInterface $entity        Reference entity
+     * @param boolean         $isSubDocument Is a sub-document (recursive)
+     *
+     * @return array
      */
     public function getUpdateCriteria(EntityInterface $entity, $isSubDocument = false)
     {
@@ -151,7 +159,7 @@ class Driver extends AbstractDriver
             $type = $entity->type($property);
 
             // child entity, use recursion to populate
-            if ($type instanceof Type\EntityType) {
+            if ($type instanceof EntityType) {
                 $child = $entity->property($property)->getValue();
 
                 // if an entity is cleared out and marked as dirty, unset the mongo property
@@ -177,7 +185,7 @@ class Driver extends AbstractDriver
             }
 
             // return the date object for MongoDate
-            if ($type instanceof Type\DateTimeType) {
+            if ($type instanceof DateTimeType) {
                 $value = $this->dateType->parse($value);
             }
 
@@ -198,8 +206,9 @@ class Driver extends AbstractDriver
      * Recursively checks to see if a dirty entity is empty and contains only
      * other likewise empty entities to qualify it for being $unset.
      *
-     * @param   Contain\Entity\EntityInterface
-     * @return  boolean
+     * @param EntityInterface $entity
+     *
+     * @return boolean
      */
     protected function isDirtyEntityEmpty(EntityInterface $entity)
     {
@@ -212,7 +221,7 @@ class Driver extends AbstractDriver
         }
 
         foreach ($props as $property => $value) {
-            if (!$entity->type($property) instanceof Type\EntityType) {
+            if (!$entity->type($property) instanceof EntityType) {
                 return false;
             }
 
@@ -223,10 +232,7 @@ class Driver extends AbstractDriver
     }
 
     /**
-     * Persists an entity in MongoDB.
-     *
-     * @param   EntityInterface                 Entity to persist
-     * @return  $this
+     * {@inheritDoc}
      */
     public function persist(EntityInterface $entity)
     {
@@ -270,8 +276,9 @@ class Driver extends AbstractDriver
      * Runs a MongoDB count query to determine the number of documents
      * that match the given criteria.
      *
-     * @param   array               Criteria
-     * @return  integer
+     * @param array $criteria Criteria
+     *
+     * @return int
      */
     public function count($criteria)
     {
@@ -279,10 +286,7 @@ class Driver extends AbstractDriver
     }
 
     /**
-     * Deletes an entity.
-     *
-     * @param   Contain\Entity\EntityInterface
-     * @return  $this
+     * {@inheritDoc}
      */
     public function delete(EntityInterface $entity)
     {
@@ -307,10 +311,7 @@ class Driver extends AbstractDriver
     }
 
     /**
-     * Finds a single entity and returns its data.
-     *
-     * @param   array               Criteria
-     * @return  array
+     * {@inheritDoc}
      */
     public function findOne($criteria = null)
     {
@@ -327,10 +328,7 @@ class Driver extends AbstractDriver
     }
 
     /**
-     * Finds multiple entities and returns their data.
-     *
-     * @param   array               Criteria
-     * @return  Traversable
+     * {@inheritDoc}
      */
     public function find($criteria = null)
     {
@@ -358,12 +356,7 @@ class Driver extends AbstractDriver
     }
 
     /**
-     * Increments a numerical property.
-     *
-     * @param   Contain\Entity\EntityInterface  Entity to persist
-     * @param   string                          Query to resolve path to numeric property
-     * @param   integer                         Amount to increment by
-     * @return  $this
+     * {@inheritDoc}
      */
     public function increment(EntityInterface $entity, $query, $inc)
     {
@@ -387,14 +380,7 @@ class Driver extends AbstractDriver
     }
 
     /**
-     * Appends one value to the end of a ListType, optionally if it doesn't
-     * exist only. In MongoDB this is an atomic operation.
-     *
-     * @param   Contain\Entity\EntityInterface  Entity to persist
-     * @param   string                          Query to resolve which should point to a ListType
-     * @param   mixed|array                     Value to append
-     * @param   boolean                         Only add if it doesn't exist
-     * @return  $this
+     * {@inheritDoc}
      */
     public function push(EntityInterface $entity, $query, $value, $ifNotExists = false)
     {
@@ -422,10 +408,10 @@ class Driver extends AbstractDriver
     /**
      * Removes a value from a ListType. In MongoDB this is an atomic operation.
      *
-     * @param   Contain\Entity\EntityInterface  Entity to persist
-     * @param   string                          Query to resolve which should point to a ListType
-     * @param   mixed|array                     Value to remove
-     * @return  $this
+     * @param EntityInterface $entity Entity to persist
+     * @param string          $query  Query to resolve which should point to a ListType
+     * @param mixed|array     $value  Value to remove
+     * @return self
      */
     public function pull(EntityInterface $entity, $query, $value)
     {
@@ -449,14 +435,7 @@ class Driver extends AbstractDriver
     }
 
     /**
-     * Post-hydration callback. Attempts to set the internal _id property
-     * Mongo uses to identity the primary unique id of the entity, either
-     * from the Mongo driver if this is an internal invokation or by
-     * extrapolating it from the primary scalar id.
-     *
-     * @param   Contain\Entity\EntityInterface
-     * @param   Values we returned
-     * @return  $this
+     * {@inheritDoc}
      */
     public function hydrate(EntityInterface $entity, $values)
     {
@@ -480,8 +459,9 @@ class Driver extends AbstractDriver
      * Pulls out the internal value to use as the primary id and persists it
      * to the entity's _id extended property.
      *
-     * @param   Contain\Entity\EntityInterface
-     * @return  mixed
+     * @param EntityInterface $entity
+     *
+     * @return mixed
      */
     public function extractId(EntityInterface $entity)
     {
