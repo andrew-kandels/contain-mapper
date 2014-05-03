@@ -39,7 +39,7 @@ abstract class AbstractService extends AbstractQuery
     protected $eventManager;
 
     /**
-     * Prepares a mapper for a method's invokation. Passes along
+     * Prepares a mapper for a method's invocation. Passes along
      * options, sort, limiting and other query specific
      * attributes.
      *

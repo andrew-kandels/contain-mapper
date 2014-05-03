@@ -204,7 +204,7 @@ abstract class AbstractQuery
 
     /**
      * Sets a mapper level option that will be passed to the next
-     * mapper method invokation.
+     * mapper method invocation.
      *
      * @param string $name  Option Name
      * @param mixed  $value Option Value
@@ -219,7 +219,7 @@ abstract class AbstractQuery
 
     /**
      * Sets mapper level options that will be passed to the next
-     * mapper method invokation.
+     * mapper method invocation.
      *
      * @param array|Traversable $options Option Name
      *
@@ -242,7 +242,7 @@ abstract class AbstractQuery
 
     /**
      * Pulls the mapper level options out of the stack in preparation
-     * for a mapper method invokation and then clears the stack for the
+     * for a mapper method invocation and then clears the stack for the
      * next.
      *
      * @param array $defaults Options

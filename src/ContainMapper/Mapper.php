@@ -52,7 +52,7 @@ class Mapper extends Service\AbstractService
     /**
      * Constructor
      *
-     * @param   string              $entity Entity Classname this mapper hydrates
+     * @param   string              $entity Entity Class name this mapper hydrates
      * @param   AbstractDriver|null $driver
      */
     public function __construct($entity, AbstractDriver $driver = null)
@@ -64,7 +64,7 @@ class Mapper extends Service\AbstractService
     /**
      * Sets the entity class this mapper hydrates.
      *
-     * @param  string $entity Entity Classname this mapper hydrates
+     * @param  string $entity Entity Class name this mapper hydrates
      * @return self
      */
     public function setEntity($entity)

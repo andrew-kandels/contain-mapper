@@ -34,15 +34,14 @@ use Memcached;
 class Connection implements ConnectionInterface
 {
     /**
-     * @var array
+     * @var Memcached
      */
     protected $connection;
 
     /**
      * Constructor
      *
-     * @param   Memcached               Memcached connection
-     * @return self
+     * @param Memcached $connection Memcached connection
      */
     public function __construct(Memcached $connection)
     {
@@ -52,7 +51,7 @@ class Connection implements ConnectionInterface
     /**
      * Return the directory as the raw connection for clients.
      *
-     * @return  string
+     * @return Memcached
      */
     public function getConnection()
     {
