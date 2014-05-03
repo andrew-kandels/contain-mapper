@@ -19,7 +19,7 @@
 
 namespace ContainMapper\Service;
 
-use ContainMapper;
+use ContainMapper\AbstractQuery;
 use Zend\EventManager\EventManager;
 use Zend\EventManager\EventManagerInterface;
 
@@ -31,7 +31,7 @@ use Zend\EventManager\EventManagerInterface;
  * @copyright   Copyright (c) 2012 Andrew P. Kandels (http://andrewkandels.com)
  * @license     http://www.opensource.org/licenses/bsd-license.php BSD License
  */
-abstract class AbstractService extends ContainMapper\AbstractQuery
+abstract class AbstractService extends AbstractQuery
 {
     /**
      * @var \Zend\EventManager\EventManagerInterface
@@ -43,12 +43,12 @@ abstract class AbstractService extends ContainMapper\AbstractQuery
      * options, sort, limiting and other query specific
      * attributes.
      *
-     * @param ContainMapper\AbstractQuery $query
-     * @param bool                        $clearProperties Clears the query properties after prepping
+     * @param AbstractQuery $query
+     * @param bool          $clearProperties Clears the query properties after prepping
      *
-     * @return ContainMapper\AbstractQuery
+     * @return AbstractQuery
      */
-    public function prepare(ContainMapper\AbstractQuery $query, $clearProperties = true)
+    public function prepare(AbstractQuery $query, $clearProperties = true)
     {
         if ($this->limit !== null) {
             $query->limit($this->limit);
