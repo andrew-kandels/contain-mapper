@@ -365,4 +365,31 @@ abstract class AbstractQuery
             'timeout' => $this->getTimeout(),
         );
     }
+
+    /**
+     * @param mixed $limit
+     *
+     * @return void
+     */
+    protected function setLimit($limit)
+    {
+    }
+
+    /**
+     * @param mixed $skip
+     *
+     * @return void
+     */
+    protected function setSkip($skip)
+    {
+    }
+
+    /**
+     * @param mixed $sort
+     *
+     * @return void
+     */
+    protected function setSort($sort)
+    {
+    }
 }
