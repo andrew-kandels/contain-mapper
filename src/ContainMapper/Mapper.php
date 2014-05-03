@@ -20,7 +20,8 @@
 namespace ContainMapper;
 
 use Contain\Entity\EntityInterface;
-use ContainMapper\Driver;
+use ContainMapper\Driver\AbstractDriver;
+use Zend\Stdlib\ArrayUtils;
 
 /**
  * Mapper which links a data source to Contain entities.
@@ -34,12 +35,14 @@ class Mapper extends Service\AbstractService
 {
     /**
      * Driver to the data source
-     * @var ContainMapper\Driver\DriverInterface
+     *
+     * @var AbstractDriver|null
      */
     protected $driver;
 
     /**
      * Entity namespace
+     *
      * @var string
      */
     protected $entity;
@@ -47,35 +50,36 @@ class Mapper extends Service\AbstractService
     /**
      * Constructor
      *
-     * @param   string                                  Entity Classname this mapper hydrates
-     * @param   ContainMapper\Driver\DriverInterface
-     * @return  void
+     * @param   string              $entity Entity Classname this mapper hydrates
+     * @param   AbstractDriver|null $driver
      */
-    public function __construct($entity, Driver\AbstractDriver $driver = null)
+    public function __construct($entity, AbstractDriver $driver = null)
     {
-        $this->entity = $entity;
+        $this->entity = (string) $entity;
         $this->driver = $driver;
     }
 
     /**
      * Sets the entity class this mapper hydrates.
      *
-     * @param   string                                  Entity Classname this mapper hydrates
-     * @return  $this
+     * @param  string $entity Entity Classname this mapper hydrates
+     * @return self
      */
     public function setEntity($entity)
     {
-        $this->entity = $entity;
+        $this->entity = (string) $entity;
+
         return $this;
     }
 
     /**
      * Sets the data source driver.
      *
-     * @param   ContainMapper\Driver\AbstractDriver
-     * @return  $this
+     * @param  AbstractDriver $driver
+     *
+     * @return self
      */
-    public function setDriver(Driver\AbstractDriver $driver)
+    public function setDriver(AbstractDriver $driver)
     {
         $this->driver = $driver;
         return $this;
@@ -84,7 +88,9 @@ class Mapper extends Service\AbstractService
     /**
      * Gets the data source driver.
      *
-     * @return  ContainMapper\Driver\AbstractDriver
+     * @return AbstractDriver
+     *
+     * @throws Exception\InvalidArgumentException
      */
     public function getDriver()
     {
@@ -100,7 +106,7 @@ class Mapper extends Service\AbstractService
     /**
      * Gets the connection for the driver.
      *
-     * @return  ContainMapper\ConnectionInterface
+     * @return \ContainMapper\Driver\ConnectionInterface
      */
     public function getConnection()
     {
@@ -110,15 +116,14 @@ class Mapper extends Service\AbstractService
     /**
      * Hydrates a driver's result data into an entity.
      *
-     * @param   array|Traversable                   Raw Database Source Data
-     * @param   Contain\Entity\EntityInterface      Entity to hydrate the data into (as opposed to creating a new object)
-     * @return  Contain\Entity\EntityInterface
+     * @param array|\Traversable $data   Raw Database Source Data
+     * @param EntityInterface    $entity Entity to hydrate the data into (as opposed to creating a new object)
+     *
+     * @return EntityInterface
      */
     public function hydrate($data = array(), EntityInterface $entity = null)
     {
-        if ($data instanceof Traversable) {
-            $data = iterator_to_array($data);
-        }
+        $data = ArrayUtils::iteratorToArray($data);
 
         if ($entity) {
             $entity->reset()->fromArray($data);
@@ -142,8 +147,9 @@ class Mapper extends Service\AbstractService
      * Locates a single data source object by some criteria and returns a
      * hydrated data entity.
      *
-     * @param   mixed                                   Query
-     * @return  Contain\Entity\EntityInterface|false    Hydrated data entity
+     * @param mixed|array $criteria
+     *
+     * @return EntityInterface|false    Hydrated data entity
      */
     public function findOne($criteria = array())
     {
@@ -158,8 +164,9 @@ class Mapper extends Service\AbstractService
      * Locates multiple data source objects by some criteria and returns an
      * array of hydrated data entities.
      *
-     * @param   mixed                                   Query
-     * @return  ContainMapper\Cursor
+     * @param mixed|array $criteria
+     *
+     * @return \ContainMapper\Cursor|EntityInterface[]
      */
     public function find($criteria = array())
     {
@@ -173,8 +180,9 @@ class Mapper extends Service\AbstractService
     /**
      * Deletes an entity from the data source driver by some criteria.
      *
-     * @param   Contain\Entity\EntityInterface
-     * @return  $this
+     * @param EntityInterface $entity
+     *
+     * @return self
      */
     public function delete($entity)
     {
@@ -191,9 +199,10 @@ class Mapper extends Service\AbstractService
     /**
      * Persist an entity to the data source driver.
      *
-     * @param   Contain\Entity\EntityInterface  Entity to persist
-     * @param   boolean                         Only persist if dirty() or not previously persisted
-     * @return  $this
+     * @param EntityInterface $entity           Entity to persist
+     * @param bool            $whenNotPersisted Only persist if dirty() or not previously persisted
+     *
+     * @return self
      */
     public function persist(EntityInterface $entity, $whenNotPersisted = true)
     {
@@ -218,23 +227,26 @@ class Mapper extends Service\AbstractService
      * various levels of sub-properties and further descendents using the
      * dot notation.
      *
-     * @param   Contain\Entity\EntityInterface  Entity to persist
-     * @param   string                          Query
-     * @return  ContainMapper\Resolver
+     * @param EntityInterface $entity Entity to persist
+     * @param string          $query
+     *
+     * @return Resolver
      */
     public function resolve(EntityInterface $entity, $query)
     {
         $resolver = new Resolver($query);
+
         return $resolver->scan($entity);
     }
 
     /**
      * Increments a numerical property.
      *
-     * @param   Contain\Entity\EntityInterface  Entity to persist
-     * @param   string                          Query to resolve path to numeric property
-     * @param   integer                         Amount to increment by
-     * @return  $this
+     * @param EntityInterface $entity Entity to persist
+     * @param string          $query  Query to resolve path to numeric property
+     * @param int             $inc    Amount to increment by
+     *
+     * @return self
      */
     public function increment(EntityInterface $entity, $query, $inc)
     {
@@ -263,11 +275,14 @@ class Mapper extends Service\AbstractService
      * Appends one value to the end of a ListType, optionally if it doesn't
      * exist only. In MongoDB this is an atomic operation.
      *
-     * @param   Contain\Entity\EntityInterface  Entity to persist
-     * @param   string                          Query to resolve which should point to a ListType
-     * @param   mixed|array                     Value to append
-     * @param   boolean                         Only add if it doesn't exist
-     * @return  $this
+     * @param EntityInterface $entity      Entity to persist
+     * @param string          $query       Query to resolve which should point to a ListType
+     * @param mixed|array     $value       Value to append
+     * @param bool            $ifNotExists Only add if it doesn't exist
+     *
+     * @return self
+     *
+     * @throws Exception\InvalidArgumentException
      */
     public function push(EntityInterface $entity, $query, $value, $ifNotExists = false)
     {
@@ -281,7 +296,7 @@ class Mapper extends Service\AbstractService
                  ->assertType('Contain\Entity\Property\Type\ListType');
 
         if (count($value = $resolver->getType()->export(array($value))) != 1) {
-            throw new InvalidArgumentException('Multiple values passed to ' . __METHOD__ . ' not allowed.');
+            throw new Exception\InvalidArgumentException('Multiple values passed to ' . __METHOD__ . ' not allowed.');
         }
 
         list($value) = $value; // remove outer array
@@ -292,7 +307,7 @@ class Mapper extends Service\AbstractService
         $property = $resolver->getEntity()->property($resolver->getProperty());
         $arr = $property->getValue() ?: array();
 
-        if ($arr instanceof \ContainMapper\Cursor) {
+        if ($arr instanceof Cursor) {
             $arr = $arr->export();
         }
 
@@ -308,10 +323,13 @@ class Mapper extends Service\AbstractService
     /**
      * Removes a value from a ListType. In MongoDB this is an atomic operation.
      *
-     * @param   Contain\Entity\EntityInterface  Entity to persist
-     * @param   string                          Query to resolve which should point to a ListType
-     * @param   mixed|array                     Value to remove
-     * @return  $this
+     * @param EntityInterface $entity Entity to persist
+     * @param string          $query  Query to resolve which should point to a ListType
+     * @param mixed|array     $value  Value to remove
+     *
+     * @return self
+     *
+     * @throws Exception\InvalidArgumentException
      */
     public function pull(EntityInterface $entity, $query, $value)
     {
@@ -325,7 +343,7 @@ class Mapper extends Service\AbstractService
                  ->assertType('Contain\Entity\Property\Type\ListType');
 
         if (count($value = $resolver->getType()->export($value)) != 1) {
-            throw new InvalidArgumentException('Multiple values passed to ' . __METHOD__ . ' not allowed.');
+            throw new Exception\InvalidArgumentException('Multiple values passed to ' . __METHOD__ . ' not allowed.');
         }
         list($value) = $value; // remove outer array
 
