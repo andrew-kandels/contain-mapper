@@ -37,29 +37,27 @@ abstract class AbstractDriver
     implements DriverInterface
 {
     /**
-     * @var Contain\Mapper\Driver\ConnectionInterface
+     * @var ConnectionInterface
      */
     protected $connection;
 
     /**
      * Constructor
      *
-     * @param   ContainMapper\ConnectionInterface
+     * @param ConnectionInterface
      * @return self
      */
     public function __construct(ConnectionInterface $connection)
     {
         $this->connection = $connection;
 
-        if (method_exists($this, 'init')) {
-            $this->init();
-        }
+        $this->init();
     }
 
     /**
      * Gets the connection object.
      *
-     * @return  ContainMapper\ConnectionInterface
+     * @return ConnectionInterface
      */
     public function getConnection()
     {
@@ -67,11 +65,7 @@ abstract class AbstractDriver
     }
 
     /**
-     * Post-hydration callback.
-     *
-     * @param   Contain\Entity\EntityInterface
-     * @param   Values we returned
-     * @return self
+     * {@inheritDoc}
      */
     public function hydrate(EntityInterface $entity, $values)
     {
@@ -79,11 +73,7 @@ abstract class AbstractDriver
     }
 
     /**
-     * Returns true if the data entity has been persisted to the data store
-     * this driver is responsible for.
-     *
-     * @param   EntityInterface                 Entity to persist
-     * @return  boolean
+     * {@inheritDoc}
      */
     public function isPersisted(EntityInterface $entity)
     {
@@ -91,14 +81,7 @@ abstract class AbstractDriver
     }
 
     /**
-     * May be invoked by the mapper if the driver supports an atomic, or
-     * more efficient incrementor method as opposed to the typical
-     * persist().
-     *
-     * @param   Contain\Entity\EntityInterface  Contain Data Entity
-     * @param   string                          Path to the property
-     * @param   integer                         Amount to increment by (+|-)
-     * @return self
+     * {@inheritDoc}
      */
     public function increment(EntityInterface $entity, $query, $inc)
     {
@@ -107,14 +90,7 @@ abstract class AbstractDriver
     }
 
     /**
-     * May be invoked by the mapper if the driver supports an atomic, or
-     * more efficient way of appending items to the end of an array property.
-     *
-     * @param   Contain\Entity\EntityInterface  Contain Data Entity
-     * @param   string                          Path to the property
-     * @param   mixed|array|Traversable         Value(s) to push
-     * @param   boolean                         Only add if it doesn't exist (if supported)
-     * @return self
+     * {@inheritDoc}
      */
     public function push(EntityInterface $entity, $query, $value, $ifNotExists = false)
     {
@@ -125,8 +101,9 @@ abstract class AbstractDriver
     /**
      * Returns the primary key or null if an entity has not been persisted.
      *
-     * @param   Contain\Entity\EntityInterface
-     * @return  string|null
+     * @param EntityInterface $entity
+     *
+     * @return string|null
      */
     public function getPrimaryScalarId(EntityInterface $entity)
     {
@@ -145,5 +122,12 @@ abstract class AbstractDriver
         }
 
         return ($primary ?: null);
+    }
+
+    /**
+     * Empty initialization callback - used as a post-construction callback
+     */
+    protected function init()
+    {
     }
 }
