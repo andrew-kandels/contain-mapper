@@ -23,7 +23,6 @@ use Contain\Entity\EntityInterface;
 use Contain\Entity\Property\Type\EntityType;
 use Contain\Entity\Property\Type\ListType;
 use Contain\Entity\Property\Type\TypeInterface;
-use ContainMapper\Cursor;
 use InvalidArgumentException;
 
 /**
