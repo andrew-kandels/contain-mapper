@@ -1,12 +1,12 @@
 <phpunit bootstrap="./vendor/autoload.php" colors="true">
     <testsuites>
         <testsuite name="akandels/contain-mapper test suite">
-            <directory>./</directory>
+            <directory>./tests</directory>
         </testsuite>
     </testsuites>
     <filter>
         <whitelist addUncoveredFilesFromWhitelist="true">
-            <directory>../</directory>
+            <directory>./src</directory>
         </whitelist>
     </filter>
 </phpunit>
