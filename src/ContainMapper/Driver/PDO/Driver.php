@@ -331,7 +331,7 @@ class Driver extends ContainMapper\Driver\AbstractDriver
      */
     protected function convertCamelToUnderscore($key)
     {
-        return strtolower(preg_replace('/[A-Z0-9]+/', '_$0', $key));
+        return strtolower(preg_replace('/[A-Z]+/', '_$0', $key));
     }
 
     /**
