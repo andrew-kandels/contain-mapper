@@ -503,13 +503,11 @@ class Driver extends ContainMapper\Driver\AbstractDriver
     {
         $this->params = array();
 
-        $dirty  = $entity->dirty() ?: array();
-        $export = $entity->export($dirty) ?: array();
-
-        $sets = array();
+        $export = $entity->export(null, true);
+        $sets   = array();
 
         foreach ($export as $key => $value) {
-            if (!$this->isHydratedProperty($entity, $key)) {
+            if (!$this->isHydratedProperty($entity, $key) || $value === null) {
                 continue;
             }
 
