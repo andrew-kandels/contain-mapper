@@ -355,7 +355,7 @@ class Driver extends ContainMapper\Driver\AbstractDriver
             }
 
             if (is_array($value)) {
-                if (count($value) != 2) {
+                if (count($value) < 2) {
                     throw new \InvalidArgumentException('$value of array type in PDO query must include 2 indexes: ($type, $value)');
                 }
 
@@ -363,6 +363,12 @@ class Driver extends ContainMapper\Driver\AbstractDriver
 
                 if ($type == 'raw') {
                     $where[] = sprintf('%s %s', $this->property($key), $expr);
+                    $params  = array_slice($value, 2);
+
+                    foreach ($params as $param) {
+                        $this->params[] = $param;
+                    }
+
                     continue;
                 }
 
