@@ -219,7 +219,16 @@ class Driver extends ContainMapper\Driver\AbstractDriver
 
         if ($this->params) {
             $stmt = $db->prepare($sql);
-            $stmt->execute($this->params);
+            try {
+                $stmt->execute($this->params);
+            } catch (\PDOException $e) {
+                throw new \RuntimeException(sprintf('(%s) %s: Query: %s with parameters: %s',
+                    get_class($e),
+                    $e->getMessage(),
+                    $sql,
+                    json_encode($this->params)
+                ));
+            }
 
             return $stmt;
         }
@@ -362,11 +371,9 @@ class Driver extends ContainMapper\Driver\AbstractDriver
                 list($type, $expr) = $value;
 
                 if ($type == 'raw') {
-                    $where[] = sprintf('%s %s', $this->property($key), $expr);
-                    $params  = array_slice($value, 2);
-
-                    foreach ($params as $param) {
-                        $this->params[] = $param;
+                    $where[] = sprintf('(%s %s)', $this->property($key), $expr);
+                    if (is_array($params = array_slice($value, 2)) && $params) {
+                        $this->params = reset($params) + $this->params;
                     }
 
                     continue;
