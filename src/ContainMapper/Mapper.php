@@ -133,6 +133,12 @@ class Mapper extends Service\AbstractService
             $entity = new $this->entity($data);
         }
 
+        if ($extendedProperties = array_diff_assoc($data, $entity->export())) {
+            foreach ($extendedProperties as $name => $value) {
+                $entity->setExtendedProperty($name, $value);
+            }
+        }
+
         $entity->persisted()->clean();
 
         // you can hydrate without a driver

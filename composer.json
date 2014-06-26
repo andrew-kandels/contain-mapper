@@ -3,7 +3,7 @@
     "description": "Series of data mappers for the retrieval and persistence of Contain data entities with databases like MongoDB or caching layers like Memcached.",
     "type": "library",
     "keywords": [
-        "zf2","entity","hydrator","contain"
+        "entity","hydrator","contain"
     ],
     "homepage": "http://contain-project.org",
     "license": "BSD-2-Clause",
@@ -19,8 +19,11 @@
         "irc": "irc://irc.freenode.net/contain"
     },
     "require": {
-        "php": ">=5.3.3",
-        "zendframework/zendframework": "~2.0",
+        "zendframework/zend-eventmanager: "~2.2",
+        "php": ">=5.3.3"
+    },
+    "suggest": {
+        "zendframework/zend-db": "~2.2",
         "akandels/contain": "dev-master"
     },
     "require-dev": {
