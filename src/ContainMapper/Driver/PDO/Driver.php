@@ -310,7 +310,7 @@ class Driver extends ContainMapper\Driver\AbstractDriver
 
             case self::NAMING_CAMEL:
             default:
-                return ($table . ucfirst($property));
+                return ($table . ucfirst($name));
                 break;
         }
     }
