@@ -19,7 +19,7 @@
         "irc": "irc://irc.freenode.net/contain"
     },
     "require": {
-        "zendframework/zend-eventmanager: "~2.2",
+        "zendframework/zend-eventmanager": "~2.2",
         "php": ">=5.3.3"
     },
     "suggest": {
