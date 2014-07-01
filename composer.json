@@ -19,10 +19,11 @@
         "irc": "irc://irc.freenode.net/contain"
     },
     "require": {
+        "zendframework/zend-eventmanager": "~2.2",
         "php": ">=5.3.3"
     },
     "suggest": {
-        "zendframework/zendframework": "~2.0",
+        "zendframework/zend-db": "~2.2",
         "akandels/contain": "dev-master"
     },
     "require-dev": {

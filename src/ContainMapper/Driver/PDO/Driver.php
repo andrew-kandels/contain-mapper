@@ -310,7 +310,7 @@ class Driver extends ContainMapper\Driver\AbstractDriver
 
             case self::NAMING_CAMEL:
             default:
-                return ($table . ucfirst($property));
+                return ($table . ucfirst($name));
                 break;
         }
     }
@@ -567,10 +567,14 @@ class Driver extends ContainMapper\Driver\AbstractDriver
             ->prepare($sql)
             ->execute($this->params);
 
-        $entity->setExtendedProperty('_id', $db->lastInsertId());
+        if ($id = $db->lastInsertId()) {
+            $entity->setExtendedProperty('_id', $db->lastInsertId());
 
-        if (($primary = $entity->primary()) && count($primary) == 1) {
-            $entity->set(implode('', array_slice(array_keys($primary), 0, 1)), $entity->getExtendedProperty('_id'));
+            if (($primary = $entity->primary()) && count($primary) == 1) {
+                $entity->set(implode('', array_slice(array_keys($primary), 0, 1)), $entity->getExtendedProperty('_id'));
+            }
+        } elseif (($primary = $entity->primary()) && count($primary) == 1) {
+            $entity->setExtendedProperty('_id', array_shift($primary));
         }
 
         return $this;
