@@ -344,12 +344,34 @@ class Driver extends ContainMapper\Driver\AbstractDriver
     }
 
     /**
+     * Returns the active query parameters.
+     *
+     * @return  array
+     */
+    public function getParams()
+    {
+        return $this->params;
+    }
+
+    /**
+     * Sets the query parameters.
+     *
+     * @param   array $params
+     * @return  self
+     */
+    public function setParams(array $params)
+    {
+        $this->params = $params;
+        return $this;
+    }
+
+    /**
      * Converts array-based criteria to a WHERE clause.
      *
      * @param   array                   Criteria
      * @return  string
      */
-    protected function criteria(array $criteria = array())
+    public function criteria(array $criteria = array())
     {
         if (!$criteria) {
             return '';
