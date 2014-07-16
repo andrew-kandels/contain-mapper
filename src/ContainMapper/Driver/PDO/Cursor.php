@@ -149,4 +149,20 @@ class Cursor implements Iterator
     {
         return isset($this->cache[$this->iterator]);
     }
+
+    /**
+     * Counts the number of records (expensive!)
+     *
+     * @return  integer
+     */
+    public function count()
+    {
+        $num = 0;
+
+        foreach ($this as $row) {
+            $num++;
+        }
+
+        return $num;
+    }
 }
