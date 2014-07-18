@@ -78,15 +78,17 @@ class Cursor extends Service\AbstractService implements Iterator
     /**
      * Exports the cursor as a plain array.
      *
+     * @param  array   $includeProperties
+     * @param  boolean $includeUnset
      * @return array
      */
-    public function export()
+    public function export($includeProperties = null, $includeUnset = false)
     {
         $return = array();
 
         /* @var $item \Contain\Entity\EntityInterface */
         foreach ($this as $item) {
-            $return[] = $item->export();
+            $return[] = $item->export($includeProperties, $includeUnset);
         }
 
         return $return;
