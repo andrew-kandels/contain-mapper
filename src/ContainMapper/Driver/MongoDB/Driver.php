@@ -244,7 +244,7 @@ class Driver extends AbstractDriver
                 $this->getOptions(array(
                     'w' => 1,
                     'fsync'   => false,
-                    'timeout' => 60000, // 1 minute
+                    'socketTimeoutMS' => 60000, // 1 minute
                 ))
             );
         } else {
@@ -262,7 +262,7 @@ class Driver extends AbstractDriver
                     'multiple' => false,
                     'w' => 1,
                     'fsync' => false,
-                    'timeout' => 60000, // 1 minute
+                    'socketTimeoutMS' => 60000, // 1 minute
                 ))
             );
         }
@@ -299,7 +299,7 @@ class Driver extends AbstractDriver
             'justOne' => true,
             'w'    => 1,
             'fsync'   => false,
-            'timeout' => 60000, // 1 minute
+            'socketTimeoutMS' => 60000, // 1 minute
         ));
 
         $this->getConnection()->getCollection()->remove(
@@ -372,7 +372,7 @@ class Driver extends AbstractDriver
                 'multiple' => false,
                 'w' => 1,
                 'fsync' => false,
-                'timeout' => 60000, // 1 minute
+                'socketTimeoutMS' => 60000, // 1 minute
             ))
         );
 
@@ -398,7 +398,7 @@ class Driver extends AbstractDriver
                 'multiple' => false,
                 'w' => 1,
                 'fsync' => false,
-                'timeout' => 60000, // 1 minute
+                'socketTimeoutMS' => 60000, // 1 minute
             ))
         );
 
@@ -427,7 +427,7 @@ class Driver extends AbstractDriver
                 'multiple' => false,
                 'w' => 1,
                 'fsync' => false,
-                'timeout' => 60000, // 1 minute
+                'socketTimeoutMS' => 60000, // 1 minute
             ))
         );
 
