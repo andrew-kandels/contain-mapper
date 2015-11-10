@@ -6,3 +6,4 @@ extras/documentation
 *.swp
 vendor/
 composer.lock
+.DS_Store
