@@ -1,16 +1,16 @@
 {
-    "name": "akandels/contain-mapper",
+    "name": "fieldnation/contain-mapper",
     "description": "Series of data mappers for the retrieval and persistence of Contain data entities with databases like MongoDB or caching layers like Memcached.",
     "type": "library",
     "keywords": [
-        "zf2","entity","hydrator","contain"
+        "entity","hydrator","contain"
     ],
     "homepage": "http://contain-project.org",
     "license": "BSD-2-Clause",
     "authors": [
         {
             "name": "Andrew Kandels",
-            "email": "akandels@gmail.com",
+            "email": "fieldnation@gmail.com",
             "role": "lead"
         }
     ],
@@ -19,9 +19,12 @@
         "irc": "irc://irc.freenode.net/contain"
     },
     "require": {
-        "php": ">=5.3.3",
-        "zendframework/zendframework": "~2.0",
-        "akandels/contain": "dev-master"
+        "zendframework/zend-eventmanager": "~2.2",
+        "php": ">=5.3.3"
+    },
+    "suggest": {
+        "zendframework/zend-db": "~2.2",
+        "fieldnation/contain": "dev-master"
     },
     "require-dev": {
         "phpunit/phpunit": "~4.0"
@@ -36,7 +39,7 @@
             "ContainMapperTest": "tests/"
         },
         "psr-4": {
-            "ContainTest\\": "vendor/akandels/contain/tests/Contain"
+            "ContainTest\\": "vendor/fieldnation/contain/tests/Contain"
         }
     }
 }

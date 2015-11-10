@@ -120,12 +120,17 @@ class Mapper extends Service\AbstractService
      *
      * @param array|\Traversable $data   Raw Database Source Data
      * @param EntityInterface    $entity Entity to hydrate the data into (as opposed to creating a new object)
+     * @param String             $hydrationMode The type of hydration to use
      *
      * @return EntityInterface
      */
-    public function hydrate($data = array(), EntityInterface $entity = null)
+    public function hydrate($data = array(), EntityInterface $entity = null, $hydrationMode = AbstractDriver::HYDRATION_MODE_RECORD)
     {
         $data = ArrayUtils::iteratorToArray($data);
+
+        if ($hydrationMode === AbstractDriver::HYDRATION_MODE_SCALAR) {
+            return $data;
+        }
 
         if ($entity) {
             $entity->reset()->fromArray($data);
@@ -133,7 +138,13 @@ class Mapper extends Service\AbstractService
             $entity = new $this->entity($data);
         }
 
-        $entity->persisted()->clean();
+        if ($extendedProperties = array_diff_assoc($data, $entity->export())) {
+            foreach ($extendedProperties as $name => $value) {
+                $entity->setExtendedProperty($name, $value);
+            }
+        }
+
+        $entity->persisted();
 
         // you can hydrate without a driver
         if ($this->driver) {

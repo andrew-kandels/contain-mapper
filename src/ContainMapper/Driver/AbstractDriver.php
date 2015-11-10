@@ -36,6 +36,9 @@ abstract class AbstractDriver
        extends ContainMapper\AbstractQuery
     implements DriverInterface
 {
+    const HYDRATION_MODE_RECORD = 'record';
+    const HYDRATION_MODE_SCALAR = 'scalar';
+
     /**
      * @var ConnectionInterface
      */
