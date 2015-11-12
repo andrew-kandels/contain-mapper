@@ -483,6 +483,11 @@ class Driver extends ContainMapper\Driver\AbstractDriver
 
         foreach ($export as $key => $value) {
             if (isset($primary[$key])) {
+                // @todo this is a hack to quickly fix a cardtronics issue!
+                // Removal of the 'clean' method call in hydrate is probable cause
+                // Fix by putting back in or using 'reset' instead.
+                unset($export[$key]);
+                continue;
                 throw new \InvalidArgumentException('Cannot update - primary key property changed');
             }
 
