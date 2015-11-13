@@ -226,8 +226,11 @@ class Driver extends AbstractDriver {
         if ($this->hydrationStyle == self::HYDRATION_STYLE_UNDERSCORE_TO_CAMELCASE) {
             if (is_array($data)) {
                 foreach ($data as $prop => $val) {
-                    $data[self::camelcaseToUnderscore($prop)] = $val;
-                    unset($data[$prop]);
+                    $propNew = self::camelcaseToUnderscore($prop);
+                    if ($propNew != $prop) {
+                        $data[$propNew] = $val;
+                        unset($data[$prop]);
+                    }
                 }
             } else {
                 $data = self::camelcaseToUnderscore($data);
