@@ -144,7 +144,7 @@ class Mapper extends Service\AbstractService
             }
         }
 
-        $entity->persisted();
+        $entity->persisted()->clean();
 
         // you can hydrate without a driver
         if ($this->driver) {
